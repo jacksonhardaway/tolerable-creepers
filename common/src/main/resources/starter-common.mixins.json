@@ -2,6 +2,7 @@
   "required": true,
   "package": "gg.moonflower.starter.core.mixin",
   "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.8",
   "client": [
   ],
   "mixins": [
