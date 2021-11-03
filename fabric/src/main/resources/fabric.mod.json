@@ -8,8 +8,8 @@
   "contributors": [ "An author", "Another author", "The last author" ],
   "contact": {
     "homepage": "https://moonflower.gg",
-	"issues": "https://github.com/MoonflowerTeam/starter/issues",
-    "sources": "https://github.com/MoonflowerTeam/starter"
+	"issues": "https://github.com/MoonflowerTeam/${repo}/issues",
+    "sources": "https://github.com/MoonflowerTeam/${repo}/"
   },
   "license": "GPLv3",
   "environment": "*",
