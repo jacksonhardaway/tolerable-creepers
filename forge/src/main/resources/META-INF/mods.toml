@@ -4,9 +4,9 @@ issueTrackerURL = "https://github.com/MoonflowerTeam/starter/issues"
 license = "GPLv3"
 
 [[mods]]
-modId = "starter"
+modId = "${id}"
 version = "${version}"
-displayName = "Starter"
+displayName = "${name}"
 authors = "Moonflower Studio"
 credits = "An author, another author, and the last author."
 description = '''
@@ -15,14 +15,14 @@ This is an example starter template.
 updateJSONURL = "https://github.com/MoonflowerTeam/starter/update.json"
 #logoFile = ""
 
-[[dependencies.starter]]
+[[dependencies.${id}]]
 modId = "forge"
 mandatory = true
 versionRange = "[37,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.starter]]
+[[dependencies.${id}]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.17,)"
