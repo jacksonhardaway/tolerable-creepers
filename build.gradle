@@ -36,9 +36,7 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        if (JavaVersion.current().isJava9Compatible()) {
-            options.release.set(8)
-        }
+        options.release.set(16)
     }
 
     java {
