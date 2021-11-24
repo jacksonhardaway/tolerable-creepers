@@ -32,6 +32,15 @@ allprojects {
     group = rootProject.maven_group
 
     repositories {
+		mavenLocal()
+        maven { url = "https://jitpack.io" }
+        maven { url "https://maven.jaackson.me" }
+        maven {
+            url "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
     }
 
     tasks.withType(JavaCompile) {

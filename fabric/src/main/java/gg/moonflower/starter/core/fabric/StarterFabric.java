@@ -6,6 +6,6 @@ import net.fabricmc.api.ModInitializer;
 public class StarterFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        Starter.init();
+        Starter.PLATFORM.setup();
     }
 }
