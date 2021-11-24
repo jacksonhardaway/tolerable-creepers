@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "${name}",
   "description": "This is an example starter template.",
-  "authors": [ "Moonflower Studio" ],
+  "authors": [ "Moonflower" ],
   "contributors": [ "An author", "Another author", "The last author" ],
   "contact": {
     "homepage": "https://moonflower.gg",
@@ -24,6 +24,7 @@
   },
   "depends": {
     "fabric": "*",
-    "minecraft": "1.16.5"
+    "minecraft": "1.16.5",
+    "pollen": "1.0.0"
   }
 }
