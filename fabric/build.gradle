@@ -39,8 +39,7 @@ dependencies {
 
     modRuntimeOnly "com.terraformersmc:modmenu:${rootProject.mod_menu_version}"
 
-    implementation(project(path: ":common", configuration: "namedElements")) { transitive false }
-    developmentFabric(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }
 
@@ -48,13 +47,13 @@ processResources {
     inputs.property "id", rootProject.mod_id
     inputs.property "name", rootProject.mod_name
     inputs.property "version", rootProject.mod_version
-    inputs.property "repo", rootProject.repo_name
+    inputs.property "repo", rootProject.name
 
     filesMatching("fabric.mod.json") {
         expand "id": rootProject.mod_id,
                 "name": rootProject.mod_name,
                 "version": rootProject.mod_version,
-                "repo": rootProject.repo_name
+                "repo": rootProject.name
     }
 
     doLast {
@@ -65,6 +64,8 @@ processResources {
 }
 
 shadowJar {
+    exclude "archiectury.common.json"
+
     configurations = [project.configurations.shadowCommon]
     classifier "dev-shadow"
 }

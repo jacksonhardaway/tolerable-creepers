@@ -12,7 +12,7 @@ credits = "An author, another author, and the last author."
 description = '''
 This is an example starter template.
 '''
-updateJSONURL = "https://github.com/MoonflowerTeam/${repo}/update.json"
+#updateJSONURL = ""
 #logoFile = ""
 
 [[dependencies.${id}]]
