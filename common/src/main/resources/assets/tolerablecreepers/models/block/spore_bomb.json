@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "blocks:block/spore_bomb_bottom",
+    "north": "blocks:block/spore_bomb_side",
+    "south": "blocks:block/spore_bomb_side",
+    "east": "blocks:block/spore_bomb_side",
+    "west": "blocks:block/spore_bomb_side",
+    "up": "blocks:block/spore_bomb_top",
+    "down": "blocks:block/spore_bomb_bottom"
+  }
+}

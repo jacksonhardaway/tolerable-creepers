@@ -1,0 +1,67 @@
+{
+	"credit": "Made by Farcr",
+	"ambientocclusion": false,
+	"textures": {
+		"particle": "block/flower_pot",
+		"flowerpot": "block/flower_pot",
+		"creeper": "blocks:block/potted_creepie"
+	},
+	"elements": [
+		{
+			"from": [5, 0, 5],
+			"to": [6, 6, 11],
+			"faces": {
+				"north": {"uv": [10, 10, 11, 16], "texture": "#flowerpot"},
+				"east": {"uv": [5, 10, 11, 16], "texture": "#flowerpot"},
+				"south": {"uv": [5, 10, 6, 16], "texture": "#flowerpot"},
+				"west": {"uv": [5, 10, 11, 16], "texture": "#flowerpot"},
+				"up": {"uv": [5, 5, 6, 11], "texture": "#flowerpot"},
+				"down": {"uv": [5, 5, 6, 11], "texture": "#flowerpot", "cullface": "down"}
+			}
+		},
+		{
+			"from": [10, 0, 5],
+			"to": [11, 6, 11],
+			"faces": {
+				"north": {"uv": [5, 10, 6, 16], "texture": "#flowerpot"},
+				"east": {"uv": [5, 10, 11, 16], "texture": "#flowerpot"},
+				"south": {"uv": [10, 10, 11, 16], "texture": "#flowerpot"},
+				"west": {"uv": [5, 10, 11, 16], "texture": "#flowerpot"},
+				"up": {"uv": [10, 5, 11, 11], "texture": "#flowerpot"},
+				"down": {"uv": [10, 5, 11, 11], "texture": "#flowerpot", "cullface": "down"}
+			}
+		},
+		{
+			"from": [6, 0, 5],
+			"to": [10, 6, 6],
+			"faces": {
+				"north": {"uv": [6, 10, 10, 16], "texture": "#flowerpot"},
+				"south": {"uv": [6, 10, 10, 16], "texture": "#flowerpot"},
+				"up": {"uv": [6, 5, 10, 6], "texture": "#flowerpot"},
+				"down": {"uv": [6, 10, 10, 11], "texture": "#flowerpot", "cullface": "down"}
+			}
+		},
+		{
+			"from": [6, 0, 10],
+			"to": [10, 6, 11],
+			"faces": {
+				"north": {"uv": [6, 10, 10, 16], "texture": "#flowerpot"},
+				"south": {"uv": [6, 10, 10, 16], "texture": "#flowerpot"},
+				"up": {"uv": [6, 10, 10, 11], "texture": "#flowerpot"},
+				"down": {"uv": [6, 5, 10, 6], "texture": "#flowerpot", "cullface": "down"}
+			}
+		},
+		{
+			"from": [6, 5, 6],
+			"to": [10, 12, 10],
+			"faces": {
+				"north": {"uv": [4, 4, 8, 11], "texture": "#creeper"},
+				"east": {"uv": [0, 4, 4, 11], "texture": "#creeper"},
+				"south": {"uv": [12, 4, 16, 11], "texture": "#creeper"},
+				"west": {"uv": [8, 4, 12, 11], "texture": "#creeper"},
+				"up": {"uv": [4, 0, 8, 4], "texture": "#creeper"},
+				"down": {"uv": [8, 0, 12, 4], "texture": "#creeper"}
+			}
+		}
+	]
+}

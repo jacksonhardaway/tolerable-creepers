@@ -19,7 +19,7 @@
   ],
   "entrypoints": {
     "main": [
-      "gg.moonflower.starter.core.fabric.StarterFabric"
+      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabric"
     ]
   },
   "depends": {
