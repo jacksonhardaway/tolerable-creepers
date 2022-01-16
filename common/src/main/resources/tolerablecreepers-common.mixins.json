@@ -6,6 +6,9 @@
   "client": [
   ],
   "mixins": [
+    "IronGolemMixin",
+    "MobAccessor",
+    "ZoglinMixin"
   ],
   "injectors": {
     "defaultRequire": 1
