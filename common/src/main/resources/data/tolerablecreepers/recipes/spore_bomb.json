@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "  #",
+        "GG ",
+        "GG "
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:string"
+        },
+        "G": {
+            "item": "tolerablecreepers:creeper_spores"
+        }
+    },
+    "result": {
+        "item": "tolerablecreepers:spore_bomb",
+        "count": 2
+    },
+    "group": "bombs"
+}
