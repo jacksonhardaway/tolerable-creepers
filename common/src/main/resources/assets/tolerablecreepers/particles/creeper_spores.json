@@ -1,12 +1,12 @@
 {
   "textures": [
-    "tolerablecreepers:creeper_spores_0",
-    "tolerablecreepers:creeper_spores_1",
-    "tolerablecreepers:creeper_spores_2",
-    "tolerablecreepers:creeper_spores_3",
-    "tolerablecreepers:creeper_spores_4",
-    "tolerablecreepers:creeper_spores_5",
-	"tolerablecreepers:creeper_spores_6",
-	"tolerablecreepers:creeper_spores_7"
+    "tolerablecreepers:spore_7",
+    "tolerablecreepers:spore_6",
+    "tolerablecreepers:spore_5",
+    "tolerablecreepers:spore_4",
+    "tolerablecreepers:spore_3",
+    "tolerablecreepers:spore_2",
+	"tolerablecreepers:spore_1",
+	"tolerablecreepers:spore_0"
   ]
 }

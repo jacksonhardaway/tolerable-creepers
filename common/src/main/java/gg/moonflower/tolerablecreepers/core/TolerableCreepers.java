@@ -7,11 +7,7 @@ import gg.moonflower.pollen.api.platform.Platform;
 import gg.moonflower.pollen.api.registry.client.EntityRendererRegistry;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
-import gg.moonflower.tolerablecreepers.core.registry.TCBlocks;
-import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
-import gg.moonflower.tolerablecreepers.core.registry.TCItems;
-import gg.moonflower.tolerablecreepers.core.registry.TCParticles;
-import gg.moonflower.tolerablecreepers.core.registry.TCTags;
+import gg.moonflower.tolerablecreepers.core.registry.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -25,8 +21,8 @@ import net.minecraft.world.level.LightLayer;
 
 import java.util.Random;
 
-
 public class TolerableCreepers {
+
     public static final String MOD_ID = "tolerablecreepers";
     public static final Platform PLATFORM = Platform.builder(MOD_ID)
             .clientInit(TolerableCreepers::onClientInit)
@@ -52,10 +48,9 @@ public class TolerableCreepers {
             entityList.removeIf(entity -> !(entity instanceof LivingEntity || entity.getType().is(TCTags.EXPLOSION_PRONE)) || entity.getType().is(TCTags.EXPLOSION_IMMUNE));
             if (explosion.getSourceMob() instanceof Creeper creeper) {
                 explosion.getToBlow().clear();
-                boolean hasSkylight = level.getBrightness(LightLayer.SKY, creeper.getOnPos()) > 0;
+                boolean day = level.getBrightness(LightLayer.SKY, creeper.blockPosition()) > 10 && level.isDay();
                 Random random = creeper.getRandom();
-                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY(0.5), creeper.getZ(), Math.round((hasSkylight ? 1 : 2) + (random.nextInt(hasSkylight ? 3 : 4) * creeper.getHealth() / creeper.getMaxHealth())), true);
-                //creeperSpores.createCloud();
+                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY(), creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
                 level.addFreshEntity(creeperSpores);
             }
         });
