@@ -4,11 +4,17 @@
   "version": "${version}",
   "name": "${name}",
   "description": "This is an example starter template.",
-  "authors": [ "Moonflower" ],
-  "contributors": [ "An author", "Another author", "The last author" ],
+  "authors": [
+    "Moonflower"
+  ],
+  "contributors": [
+    "Ocelot",
+    "Farcr",
+    "Abigail"
+  ],
   "contact": {
     "homepage": "https://moonflower.gg",
-	"issues": "https://github.com/MoonflowerTeam/${repo}/issues",
+    "issues": "https://github.com/MoonflowerTeam/${repo}/issues",
     "sources": "https://github.com/MoonflowerTeam/${repo}/"
   },
   "license": "GPLv3",
@@ -20,6 +26,9 @@
   "entrypoints": {
     "main": [
       "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabric"
+    ],
+    "fabric-datagen": [
+      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabricData"
     ]
   },
   "depends": {

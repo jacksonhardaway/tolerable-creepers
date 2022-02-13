@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "location",
+    "texture": "tolerablecreepers:entity/creepie_enraged",
+    "layer": "cutout"
+  }
+}

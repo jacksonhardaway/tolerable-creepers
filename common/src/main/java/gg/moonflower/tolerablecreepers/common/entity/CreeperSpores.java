@@ -19,16 +19,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-/*
- * This isn't finished, the two most important things are:
- * 1. Gravity actually working - it can fall through the floor
- * 2. Clouds from creepers not working
- * Lower priority:
- * 1. position validation
- * When creepies are added:
- * 1. Add information for who owns the creepies
- * 2. Spawn creepies from clouds
- * */
 public class CreeperSpores extends ThrowableProjectile {
 
     private static final EntityDataAccessor<Boolean> LANDED = SynchedEntityData.defineId(CreeperSpores.class, EntityDataSerializers.BOOLEAN);
@@ -59,7 +49,7 @@ public class CreeperSpores extends ThrowableProjectile {
         super.onHit(hitResult);
         boolean landed = this.hasLanded();
         if (hitResult != null) {
-            if (hitResult.getType() == HitResult.Type.BLOCK && (!((BlockHitResult) hitResult).isInside() || ((BlockHitResult) hitResult).getDirection() == Direction.UP))
+            if (hitResult.getType() != HitResult.Type.BLOCK || !((BlockHitResult) hitResult).isInside() || ((BlockHitResult) hitResult).getDirection() == Direction.UP)
                 this.setLanded();
             this.setPos(hitResult.getLocation());
         }
@@ -87,7 +77,7 @@ public class CreeperSpores extends ThrowableProjectile {
             super.tick();
 
         if (!this.hasLanded()) {
-            this.level.addParticle(TCParticles.CREEPER_SPORES.get(), this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f, 0.0f);
+            this.level.addParticle(TCParticles.CREEPER_SPORES.get(), true, this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f, 0.0f);
         } else {
             if (this.level.isClientSide()) {
                 int cloudSize = this.getCloudSize();
