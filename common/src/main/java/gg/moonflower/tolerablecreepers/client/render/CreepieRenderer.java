@@ -18,6 +18,7 @@ public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
     // TODO add geometry layer and supported for "merged" render types
     public CreepieRenderer(EntityRendererProvider.Context context) {
         super(context, MODEL, 0.25F);
+        this.addLayer(new CreepiePowerLayer(this));
     }
 
     @Override
