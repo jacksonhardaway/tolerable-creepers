@@ -15,7 +15,6 @@ public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
     private static final ResourceLocation ENRAGED = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_enraged");
     private static final ResourceLocation FRIENDLY = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_friendly");
 
-    // TODO add geometry layer and supported for "merged" render types
     public CreepieRenderer(EntityRendererProvider.Context context) {
         super(context, MODEL, 0.25F);
         this.addLayer(new CreepiePowerLayer(this));
@@ -46,6 +45,6 @@ public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
 
     @Override
     public ResourceLocation getTextureTableLocation(Creepie entity) {
-        return NORMAL;
+        return entity.isAngry() ? ENRAGED : NORMAL;
     }
 }
