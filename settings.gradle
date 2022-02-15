@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "starter"
+rootProject.name = "tolerable-creepers"
 
 include("common")
 include("fabric")
