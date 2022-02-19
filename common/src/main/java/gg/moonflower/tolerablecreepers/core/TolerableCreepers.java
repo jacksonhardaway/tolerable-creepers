@@ -13,6 +13,7 @@ import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
+import gg.moonflower.tolerablecreepers.datagen.TCEntityTypeTagProvider;
 import gg.moonflower.tolerablecreepers.datagen.TCLanguageProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.Direction;
@@ -25,10 +26,11 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -74,7 +76,7 @@ public class TolerableCreepers {
                     return;
                 boolean day = level.getBrightness(LightLayer.SKY, creeper.blockPosition()) > 10 && level.isDay();
                 Random random = creeper.getRandom();
-                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY(), creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
+                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY() + 0.001, creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
                 level.addFreshEntity(creeperSpores);
             }
         });
@@ -85,6 +87,10 @@ public class TolerableCreepers {
                     targetSelector.removeGoal(g);
                     targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(golem, Mob.class, 5, false, false, e -> e instanceof Enemy));
                 });
+            }
+            if (entity instanceof Ocelot || entity instanceof Cat) {
+                GoalSelector targetSelector = ((MobAccessor) entity).getTargetSelector();
+                targetSelector.addGoal(1, new NearestAttackableTargetGoal<>((Mob) entity, Creepie.class, false));
             }
             //else if (mob instanceof Villager)
             //creepie avoid goal
@@ -114,5 +120,6 @@ public class TolerableCreepers {
         DataGenerator generator = ctx.getGenerator();
         PollinatedModContainer container = ctx.getMod();
         generator.addProvider(new TCLanguageProvider(generator, container));
+        generator.addProvider(new TCEntityTypeTagProvider(generator, container));
     }
 }

@@ -83,6 +83,8 @@ public class CreeperSpores extends ThrowableProjectile {
         if (!this.hasLanded()) {
             this.level.addParticle(TCParticles.CREEPER_SPORES.get(), true, this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f, 0.0f);
         } else {
+            if (this.getCloudSize() <= 0)
+                this.discard();
             if (this.level.isClientSide()) {
                 this.spawnParticleSphere(this.position(), 1, this.getCloudSize());
             } else {

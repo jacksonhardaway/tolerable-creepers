@@ -2,13 +2,14 @@
   "replace": false,
   "values": [
     "minecraft:armor_stand",
-	"minecraft:item_frame",
-	"minecraft:glow_item_frame",
-	"minecraft:painting",
-	"minecraft:minecart",
-	"minecraft:boat"
-  ],
-  "optional": [
-    "mannequins:mannequin"
+    "minecraft:item_frame",
+    "minecraft:glow_item_frame",
+    "minecraft:painting",
+    "minecraft:minecart",
+    "minecraft:boat",
+    {
+      "id": "mannequins:mannequin",
+      "required": false
+    }
   ]
 }

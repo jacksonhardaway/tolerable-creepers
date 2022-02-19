@@ -1,5 +1,7 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Dynamic;
 import gg.moonflower.pollen.api.util.NbtConstants;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationEffectHandler;
@@ -14,17 +16,24 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -38,6 +47,33 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public static final AnimationState IDLE = new AnimationState(0, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_idle"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_walk"));
     public static final AnimationState DANCE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_idle"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_dance"));
     private static final AnimationState[] ANIMATIONS = new AnimationState[]{DANCE};
+
+    protected static final ImmutableList<SensorType<? extends Sensor<? super Creepie>>> SENSOR_TYPES = ImmutableList.of(
+            SensorType.NEAREST_LIVING_ENTITIES,
+            SensorType.NEAREST_PLAYERS,
+            SensorType.HURT_BY,
+            TCEntities.CREEPIE_ATTACKABLES_SENSOR.get(),
+            TCEntities.CREEPIE_SPECIFIC_SENSOR.get()
+    );
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
+            MemoryModuleType.LOOK_TARGET,
+            MemoryModuleType.NEAREST_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+            MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
+            MemoryModuleType.HURT_BY,
+            MemoryModuleType.HURT_BY_ENTITY,
+            MemoryModuleType.WALK_TARGET,
+            MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+            MemoryModuleType.ATTACK_TARGET,
+            MemoryModuleType.ATTACK_COOLING_DOWN,
+            MemoryModuleType.INTERACTION_TARGET,
+            MemoryModuleType.PATH,
+            MemoryModuleType.AVOID_TARGET,
+            MemoryModuleType.CELEBRATE_LOCATION,
+            MemoryModuleType.DANCING,
+            MemoryModuleType.NEAREST_REPELLENT
+    );
 
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
@@ -61,6 +97,20 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.setOwner(owner);
         ((CreeperExtension) this).tolerablecreepers$setPowered(powered);
         this.updateState();
+    }
+
+    @Override
+    protected void registerGoals() {
+//        this.goalSelector.addGoal(1, new FloatGoal(this));
+//        this.goalSelector.addGoal(2, new SwellGoal(this));
+//        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Ocelot.class, 6.0F, 1.0, 1.2));
+//        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Cat.class, 6.0F, 1.0, 1.2));
+//        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, false));
+//        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
+//        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+//        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+//        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+//        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -207,6 +257,54 @@ public class Creepie extends Creeper implements AnimatedEntity {
     @Override
     public ItemStack getPickResult() {
         return new ItemStack(TCItems.CREEPER_SPORES.get());
+    }
+
+    @Override
+    protected Brain.Provider<Creepie> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+    }
+
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> dynamic) {
+        return CreepieAi.makeBrain(this, this.brainProvider().makeBrain(dynamic));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Brain<Creepie> getBrain() {
+        return (Brain<Creepie>) super.getBrain();
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        this.level.getProfiler().push("creepieBrain");
+        this.getBrain().tick((ServerLevel) this.level, this);
+        this.level.getProfiler().pop();
+        CreepieAi.updateActivity(this);
+        super.customServerAiStep();
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        CreepieAi.initMemories(this);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    @Override
+    public boolean hurt(DamageSource damageSource, float f) {
+        boolean bl = super.hurt(damageSource, f);
+        if (bl && !this.level.isClientSide() && damageSource.getEntity() instanceof LivingEntity livingAttacker)
+            CreepieAi.wasHurtBy(this, livingAttacker);
+        return bl;
+    }
+
+    protected void playSound(SoundEvent soundEvent) {
+        this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
+    }
+
+    public boolean isDancing() {
+        return this.getAnimationState() == DANCE;
     }
 
     public enum CreepieType {
