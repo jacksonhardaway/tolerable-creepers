@@ -1,11 +1,13 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
+import gg.moonflower.pollen.api.util.NbtConstants;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationEffectHandler;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationState;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import gg.moonflower.tolerablecreepers.core.extension.CreeperExtension;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
+import gg.moonflower.tolerablecreepers.core.registry.TCItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -19,11 +21,13 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -35,7 +39,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public static final AnimationState DANCE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_idle"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_dance"));
     private static final AnimationState[] ANIMATIONS = new AnimationState[]{DANCE};
 
-    private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
     private final AnimationEffectHandler effectHandler;
     private int animationTick;
@@ -56,16 +60,26 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this(TCEntities.CREEPIE.get(), level);
         this.setOwner(owner);
         ((CreeperExtension) this).tolerablecreepers$setPowered(powered);
+        this.updateState();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Creeper.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.345);
+        return Creeper.createAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.345);
+    }
+
+    private void updateState() {
+        Entity owner = this.getOwner();
+        if (owner != null) {
+            this.setType(owner instanceof Player ? CreepieType.FRIENDLY : CreepieType.NORMAL);
+        } else {
+            this.setType(CreepieType.ENRAGED);
+        }
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(ANGRY, false);
+        this.entityData.define(TYPE, 0);
     }
 
     @Override
@@ -126,16 +140,18 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
         if (this.ownerUUID != null)
-            compoundTag.putUUID("Owner", this.ownerUUID);
+            nbt.putUUID("Owner", this.ownerUUID);
+        nbt.putString("Type", this.getCreepieType().name().toLowerCase(Locale.ROOT));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
-        if (compoundTag.hasUUID("Owner"))
-            this.ownerUUID = compoundTag.getUUID("Owner");
-        this.entityData.set(ANGRY, this.ownerUUID == null);
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        if (nbt.hasUUID("Owner"))
+            this.ownerUUID = nbt.getUUID("Owner");
+        if (nbt.contains("Type", NbtConstants.STRING))
+            this.setType(CreepieType.byName(nbt.getString("Type")));
     }
 
     public void setOwner(@Nullable Entity entity) {
@@ -143,7 +159,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             this.ownerUUID = entity.getUUID();
             this.cachedOwner = entity;
         }
-        this.entityData.set(ANGRY, entity == null);
+        this.updateState();
     }
 
     @Nullable
@@ -158,8 +174,17 @@ public class Creepie extends Creeper implements AnimatedEntity {
         }
     }
 
-    public boolean isAngry() {
-        return this.level.isClientSide() ? this.entityData.get(ANGRY) : this.ownerUUID == null;
+    private void setType(CreepieType type) {
+        this.entityData.set(TYPE, type.ordinal());
+    }
+
+    public CreepieType getCreepieType() {
+        int type = this.entityData.get(TYPE);
+        if (type < 0 || type >= CreepieType.values().length) {
+            this.entityData.set(TYPE, 0);
+            return CreepieType.NORMAL;
+        }
+        return CreepieType.values()[type];
     }
 
     @Override
@@ -176,6 +201,32 @@ public class Creepie extends Creeper implements AnimatedEntity {
                 this.spawnAtLocation(itemStack);
                 this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
             }
+        }
+    }
+
+    @Override
+    public ItemStack getPickResult() {
+        return new ItemStack(TCItems.CREEPER_SPORES.get());
+    }
+
+    public enum CreepieType {
+        NORMAL, ENRAGED, FRIENDLY;
+
+        private final ResourceLocation texture;
+
+        CreepieType() {
+            this.texture = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_" + this.name().toLowerCase(Locale.ROOT));
+        }
+
+        public ResourceLocation getTexture() {
+            return texture;
+        }
+
+        public static CreepieType byName(String name) {
+            for (CreepieType type : values())
+                if (type.name().toLowerCase(Locale.ROOT).equals(name))
+                    return type;
+            return NORMAL;
         }
     }
 }

@@ -11,9 +11,6 @@ import net.minecraft.util.Mth;
 public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
 
     private static final ResourceLocation MODEL = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie");
-    private static final ResourceLocation NORMAL = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_normal");
-    private static final ResourceLocation ENRAGED = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_enraged");
-    private static final ResourceLocation FRIENDLY = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_friendly");
 
     public CreepieRenderer(EntityRendererProvider.Context context) {
         super(context, MODEL, 0.25F);
@@ -45,6 +42,6 @@ public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
 
     @Override
     public ResourceLocation getTextureTableLocation(Creepie entity) {
-        return entity.isAngry() ? ENRAGED : NORMAL;
+        return entity.getCreepieType().getTexture();
     }
 }

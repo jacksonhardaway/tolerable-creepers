@@ -15,18 +15,26 @@ import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
 import gg.moonflower.tolerablecreepers.datagen.TCLanguageProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.gameevent.GameEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Random;
 
@@ -40,6 +48,7 @@ public class TolerableCreepers {
             .commonPostInit(TolerableCreepers::onCommonPostInit)
             .dataInit(TolerableCreepers::onDataInit)
             .build();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static void onClientInit() {
         ParticleFactoryRegistryEvent.EVENT.register(TCParticles::registerParticles);
@@ -85,6 +94,20 @@ public class TolerableCreepers {
 
     private static void onCommonPostInit(Platform.ModSetupContext ctx) {
         EntityAttributeRegistry.register(TCEntities.CREEPIE, Creepie::createAttributes);
+        ctx.enqueueWork(() -> DispenserBlock.registerBehavior(TCItems.CREEPER_SPORES.get(), (blockSource, stack) -> {
+            Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+
+            try {
+                TCEntities.CREEPIE.get().spawn(blockSource.getLevel(), stack, null, blockSource.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
+            } catch (Exception var6) {
+                LOGGER.error("Error while dispensing spawn egg from dispenser at {}", blockSource.getPos(), var6);
+                return ItemStack.EMPTY;
+            }
+
+            stack.shrink(1);
+            blockSource.getLevel().gameEvent(GameEvent.ENTITY_PLACE, blockSource.getPos());
+            return stack;
+        }));
     }
 
     private static void onDataInit(Platform.DataSetupContext ctx) {
