@@ -141,6 +141,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
         if (this.ownerUUID != null)
             nbt.putUUID("Owner", this.ownerUUID);
         nbt.putString("Type", this.getCreepieType().name().toLowerCase(Locale.ROOT));
@@ -148,6 +149,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
         if (nbt.hasUUID("Owner"))
             this.ownerUUID = nbt.getUUID("Owner");
         if (nbt.contains("Type", NbtConstants.STRING))
