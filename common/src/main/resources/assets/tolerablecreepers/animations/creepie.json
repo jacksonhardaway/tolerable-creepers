@@ -11,7 +11,7 @@
 		},
 		"creepie_walk": {
 			"loop": true,
-			"blend_weight": "q.limb_swing_amount",
+			"blend_weight": "(1.0 - math.clamp((q.distance_from_camera - 16.0) / 16.0, 0.0, 1.0)) * q.limb_swing_amount",
 			"animation_length": 1.18,
 			"bones": {
 				"upper_body": {
