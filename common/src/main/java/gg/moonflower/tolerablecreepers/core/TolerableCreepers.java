@@ -1,5 +1,6 @@
 package gg.moonflower.tolerablecreepers.core;
 
+import gg.moonflower.pollen.api.datagen.provider.model.PollinatedModelProvider;
 import gg.moonflower.pollen.api.event.events.entity.EntityEvents;
 import gg.moonflower.pollen.api.event.events.registry.client.ParticleFactoryRegistryEvent;
 import gg.moonflower.pollen.api.event.events.world.ExplosionEvents;
@@ -9,11 +10,14 @@ import gg.moonflower.pollen.api.registry.client.EntityRendererRegistry;
 import gg.moonflower.pollen.api.registry.client.ModelRegistry;
 import gg.moonflower.pollen.api.util.PollinatedModContainer;
 import gg.moonflower.tolerablecreepers.client.render.CreepieRenderer;
+import gg.moonflower.tolerablecreepers.client.render.SporeBarrelRenderer;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
+import gg.moonflower.tolerablecreepers.datagen.TCBlockModelProvider;
 import gg.moonflower.tolerablecreepers.datagen.TCEntityTypeTagProvider;
+import gg.moonflower.tolerablecreepers.datagen.TCItemModelProvider;
 import gg.moonflower.tolerablecreepers.datagen.TCLanguageProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.Direction;
@@ -61,6 +65,7 @@ public class TolerableCreepers {
     private static void onClientPostInit(Platform.ModSetupContext ctx) {
         EntityRendererRegistry.register(TCEntities.CREEPER_SPORES, NoopRenderer::new);
         EntityRendererRegistry.register(TCEntities.CREEPIE, CreepieRenderer::new);
+        EntityRendererRegistry.register(TCEntities.SPORE_BARREL, SporeBarrelRenderer::new);
     }
 
     private static void onCommonInit() {
@@ -76,7 +81,8 @@ public class TolerableCreepers {
                     return;
                 boolean day = level.getBrightness(LightLayer.SKY, creeper.blockPosition()) > 10 && level.isDay();
                 Random random = creeper.getRandom();
-                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY() + 0.001, creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
+                CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY() + 0.01, creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
+                creeperSpores.setOwner(creeper);
                 level.addFreshEntity(creeperSpores);
             }
         });
@@ -121,5 +127,9 @@ public class TolerableCreepers {
         PollinatedModContainer container = ctx.getMod();
         generator.addProvider(new TCLanguageProvider(generator, container));
         generator.addProvider(new TCEntityTypeTagProvider(generator, container));
+        PollinatedModelProvider modelProvider = new PollinatedModelProvider(generator, container);
+        modelProvider.addGenerator(TCBlockModelProvider::new);
+        modelProvider.addGenerator(TCItemModelProvider::new);
+        generator.addProvider(modelProvider);
     }
 }

@@ -1,5 +1,7 @@
 {
+  "block.tolerablecreepers.spore_barrel": "Spore Barrel",
   "entity.tolerablecreepers.creeper_spores": "Creeper Spores",
   "entity.tolerablecreepers.creepie": "Creepie",
+  "entity.tolerablecreepers.spore_barrel": "Spore Barrel",
   "item.tolerablecreepers.creeper_spores": "Creeper Spores"
 }
