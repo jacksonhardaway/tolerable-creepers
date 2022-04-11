@@ -1,21 +1,21 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        "  #",
-        "GG ",
-        "GG "
-    ],
-    "key": {
-        "#": {
-            "item": "minecraft:string"
-        },
-        "G": {
-            "item": "tolerablecreepers:creeper_spores"
-        }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  #",
+    "GG ",
+    "GG "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:string"
     },
-    "result": {
-        "item": "tolerablecreepers:spore_bomb",
-        "count": 2
-    },
-    "group": "bombs"
+    "G": {
+      "item": "tolerablecreepers:creeper_spores"
+    }
+  },
+  "result": {
+    "item": "tolerablecreepers:spore_bomb",
+    "count": 2
+  },
+  "group": "bombs"
 }

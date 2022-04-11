@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "tolerablecreepers:creeper_spores"
+    }
+  },
+  "result": {
+    "item": "tolerablecreepers:spore_barrel"
+  }
+}

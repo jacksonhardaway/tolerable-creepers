@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tolerablecreepers:spore_barrel"
+    }
+  ],
+  "result": {
+    "item": "tolerablecreepers:creeper_spores",
+    "count": 9
+  }
+}

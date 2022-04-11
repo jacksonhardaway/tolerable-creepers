@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "tolerablecreepers:creeper_spores"
+    ]
+  },
+  "criteria": {
+    "has_creeper_spores": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "tolerablecreepers:creeper_spores"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "tolerablecreepers:creeper_spores"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_creeper_spores",
+      "has_the_recipe"
+    ]
+  ]
+}

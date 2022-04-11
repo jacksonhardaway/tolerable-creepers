@@ -1,18 +1,18 @@
 {
-    "type": "minecraft:crafting_shapeless",
-    "ingredients": [
-        {
-            "item": "minecraft:arrow"
-        },
-        {
-            "item": "tolerablecreepers:creepers_spores"
-        },
-        {
-            "item": "minecraft:arrow"
-        }
-    ],
-    "result": {
-        "item": "tolerablecreepers:mischief_arrow",
-        "count": 2
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:arrow"
+    },
+    {
+      "item": "tolerablecreepers:creepers_spores"
+    },
+    {
+      "item": "minecraft:arrow"
     }
+  ],
+  "result": {
+    "item": "tolerablecreepers:mischief_arrow",
+    "count": 2
+  }
 }

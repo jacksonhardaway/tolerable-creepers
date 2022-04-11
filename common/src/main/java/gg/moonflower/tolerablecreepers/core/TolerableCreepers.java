@@ -15,10 +15,7 @@ import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
-import gg.moonflower.tolerablecreepers.datagen.TCBlockModelProvider;
-import gg.moonflower.tolerablecreepers.datagen.TCEntityTypeTagProvider;
-import gg.moonflower.tolerablecreepers.datagen.TCItemModelProvider;
-import gg.moonflower.tolerablecreepers.datagen.TCLanguageProvider;
+import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
@@ -48,8 +45,8 @@ public class TolerableCreepers {
 
     public static final String MOD_ID = "tolerablecreepers";
     public static final Platform PLATFORM = Platform.builder(MOD_ID)
-            .clientInit(TolerableCreepers::onClientInit)
-            .clientPostInit(TolerableCreepers::onClientPostInit)
+            .clientInit(() -> TolerableCreepers::onClientInit)
+            .clientPostInit(() -> TolerableCreepers::onClientPostInit)
             .commonInit(TolerableCreepers::onCommonInit)
             .commonPostInit(TolerableCreepers::onCommonPostInit)
             .dataInit(TolerableCreepers::onDataInit)
@@ -82,7 +79,8 @@ public class TolerableCreepers {
                 boolean day = level.getBrightness(LightLayer.SKY, creeper.blockPosition()) > 10 && level.isDay();
                 Random random = creeper.getRandom();
                 CreeperSpores creeperSpores = new CreeperSpores(level, creeper.getX(), creeper.getY() + 0.01, creeper.getZ(), Math.round(((day ? 1 : 2) + random.nextInt(day ? 2 : 3)) * creeper.getHealth() / creeper.getMaxHealth()), creeper.isPowered());
-                creeperSpores.setOwner(creeper);
+                if (!creeper.isInvisible())
+                    creeperSpores.setOwner(creeper);
                 level.addFreshEntity(creeperSpores);
             }
         });
@@ -127,6 +125,7 @@ public class TolerableCreepers {
         PollinatedModContainer container = ctx.getMod();
         generator.addProvider(new TCLanguageProvider(generator, container));
         generator.addProvider(new TCEntityTypeTagProvider(generator, container));
+        generator.addProvider(new TCRecipeProvider(generator));
         PollinatedModelProvider modelProvider = new PollinatedModelProvider(generator, container);
         modelProvider.addGenerator(TCBlockModelProvider::new);
         modelProvider.addGenerator(TCItemModelProvider::new);

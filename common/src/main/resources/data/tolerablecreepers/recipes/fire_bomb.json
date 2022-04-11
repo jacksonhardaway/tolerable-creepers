@@ -1,21 +1,21 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        "  #",
-        "GG ",
-        "GG "
-    ],
-    "key": {
-        "#": {
-            "item": "minecraft:string"
-        },
-        "G": {
-            "item": "minecraft:gunpowder"
-        }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  #",
+    "GG ",
+    "GG "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:string"
     },
-    "result": {
-        "item": "tolerablecreepers:fire_bomb",
-        "count": 2
-    },
-    "group": "bombs"
+    "G": {
+      "item": "minecraft:gunpowder"
+    }
+  },
+  "result": {
+    "item": "tolerablecreepers:fire_bomb",
+    "count": 2
+  },
+  "group": "bombs"
 }
