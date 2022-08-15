@@ -2,7 +2,6 @@ package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import gg.moonflower.pollen.api.util.NbtConstants;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationEffectHandler;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationState;
@@ -10,6 +9,7 @@ import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import gg.moonflower.tolerablecreepers.core.extension.CreeperExtension;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCItems;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,22 +18,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -75,7 +77,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             MemoryModuleType.NEAREST_REPELLENT
     );
 
-    private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
     private final AnimationEffectHandler effectHandler;
     private AnimationState animationState;
@@ -83,6 +85,10 @@ public class Creepie extends Creeper implements AnimatedEntity {
     private int animationTick;
     private int animationTransitionTick;
     private int animationTransitionLength;
+
+    private int age;
+    private int forcedAge;
+    private int forcedAgeTimer;
 
     @Nullable
     private UUID ownerUUID;
@@ -94,6 +100,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.effectHandler = new AnimationEffectHandler(this);
         this.animationState = AnimationState.EMPTY;
         this.transitionAnimationState = AnimationState.EMPTY;
+        this.age = -24000;
     }
 
     public Creepie(Level level, @Nullable Entity owner, boolean powered) {
@@ -133,7 +140,35 @@ public class Creepie extends Creeper implements AnimatedEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(TYPE, 0);
+        this.entityData.define(DATA_TYPE_ID, 0);
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (stack.is(Items.BONE_MEAL)) {
+            if (!player.isCreative())
+                stack.shrink(1);
+            this.ageUp((int) ((float) (-this.getAge() / 20) * 0.1F), true);
+            this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+            return InteractionResult.sidedSuccess(this.level.isClientSide());
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.level.isClientSide()) {
+            if (this.forcedAgeTimer > 0) {
+                if (this.forcedAgeTimer % 4 == 0)
+                    this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
+                --this.forcedAgeTimer;
+            }
+        } else if (this.isAlive()) {
+            this.setAge(Math.min(this.getAge() + 1, 0));
+        }
     }
 
     @Override
@@ -143,18 +178,21 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     @Override
+    protected void customServerAiStep() {
+        this.level.getProfiler().push("creepieBrain");
+        this.getBrain().tick((ServerLevel) this.level, this);
+        this.level.getProfiler().pop();
+        CreepieAi.updateActivity(this);
+        super.customServerAiStep();
+    }
+
+    @Override
     public float getRenderAnimationTick(float partialTicks) {
         if (!this.isNoAnimationPlaying())
             return AnimatedEntity.super.getRenderAnimationTick(partialTicks);
-        float o = 0.0F;
-        if (!this.isPassenger() && this.isAlive()) {
-            o = this.animationPosition - this.animationSpeed * (1.0F - partialTicks);
-            if (this.isBaby()) {
-                o *= 3.0F;
-            }
-        }
-
-        return o * 4.0F;
+        if (!this.isPassenger() && this.isAlive())
+            return (this.animationPosition - this.animationSpeed * (1.0F - partialTicks)) * 4.0F;
+        return 0.0F;
     }
 
     @Override
@@ -231,22 +269,22 @@ public class Creepie extends Creeper implements AnimatedEntity {
         if (this.ownerUUID != null)
             nbt.putUUID("Owner", this.ownerUUID);
         nbt.putString("Type", this.getCreepieType().name().toLowerCase(Locale.ROOT));
+        nbt.putInt("Age", this.getAge());
+        nbt.putInt("ForcedAge", this.forcedAge);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.hasUUID("Owner"))
-            this.ownerUUID = nbt.getUUID("Owner");
-        if (nbt.contains("Type", NbtConstants.STRING))
-            this.setType(CreepieType.byName(nbt.getString("Type")));
+        this.ownerUUID = nbt.hasUUID("Owner") ? nbt.getUUID("Owner") : null;
+        this.setType(CreepieType.byName(nbt.getString("Type")));
+        this.setAge(nbt.getInt("Age"));
+        this.forcedAge = nbt.getInt("ForcedAge");
     }
 
     public void setOwner(@Nullable Entity entity) {
-        if (entity != null) {
-            this.ownerUUID = entity.getUUID();
-            this.cachedOwner = entity;
-        }
+        this.ownerUUID = entity != null ? entity.getUUID() : null;
+        this.cachedOwner = entity;
         this.updateState();
     }
 
@@ -262,16 +300,44 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     private void setType(CreepieType type) {
-        this.entityData.set(TYPE, type.ordinal());
+        this.entityData.set(DATA_TYPE_ID, type.ordinal());
     }
 
     public CreepieType getCreepieType() {
-        int type = this.entityData.get(TYPE);
+        int type = this.entityData.get(DATA_TYPE_ID);
         if (type < 0 || type >= CreepieType.values().length) {
-            this.entityData.set(TYPE, 0);
+            this.entityData.set(DATA_TYPE_ID, 0);
             return CreepieType.NORMAL;
         }
         return CreepieType.values()[type];
+    }
+
+    public void ageUp(int amount, boolean forceAge) {
+        int j = this.getAge();
+        j += amount * 20;
+        if (j > 0) {
+            j = 0;
+        }
+
+        this.setAge(j);
+        if (forceAge) {
+            if (this.forcedAgeTimer == 0) {
+                this.forcedAgeTimer = 40;
+            }
+        }
+
+        if (this.getAge() == 0)
+            this.setAge(this.forcedAge);
+    }
+
+    public int getAge() {
+        return this.level.isClientSide() ? -1 : this.age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+        if (!this.level.isClientSide() && age >= 0)
+            this.convertTo(EntityType.CREEPER, false);
     }
 
     @Override
@@ -312,26 +378,17 @@ public class Creepie extends Creeper implements AnimatedEntity {
         return (Brain<Creepie>) super.getBrain();
     }
 
-    @Override
-    protected void customServerAiStep() {
-        this.level.getProfiler().push("creepieBrain");
-        this.getBrain().tick((ServerLevel) this.level, this);
-        this.level.getProfiler().pop();
-        CreepieAi.updateActivity(this);
-        super.customServerAiStep();
-    }
-
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType type, @Nullable SpawnGroupData data, @Nullable CompoundTag nbt) {
         CreepieAi.initMemories(this);
-        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(level, difficulty, type, data, nbt);
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float f) {
-        boolean bl = super.hurt(damageSource, f);
-        if (bl && !this.level.isClientSide() && damageSource.getEntity() instanceof LivingEntity livingAttacker)
+    public boolean hurt(DamageSource source, float amount) {
+        boolean bl = super.hurt(source, amount);
+        if (bl && !this.level.isClientSide() && source.getEntity() instanceof LivingEntity livingAttacker)
             CreepieAi.wasHurtBy(this, livingAttacker);
         return bl;
     }
