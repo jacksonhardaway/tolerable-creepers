@@ -92,7 +92,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public Creepie(EntityType<? extends Creepie> entityType, Level level) {
         super(entityType, level);
         this.effectHandler = new AnimationEffectHandler(this);
-        this.animationState = IDLE;
+        this.animationState = AnimationState.EMPTY;
+        this.transitionAnimationState = AnimationState.EMPTY;
     }
 
     public Creepie(Level level, @Nullable Entity owner, boolean powered) {
@@ -100,7 +101,6 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.setOwner(owner);
         ((CreeperExtension) this).tolerablecreepers$setPowered(powered);
         this.updateState();
-        this.animationState = IDLE;
     }
 
     @Override
@@ -144,9 +144,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     @Override
     public float getRenderAnimationTick(float partialTicks) {
-        if (this.animationState != IDLE){
-            System.out.println(this.animationState);
-            return AnimatedEntity.super.getRenderAnimationTick(partialTicks);}
+        if (!this.isNoAnimationPlaying())
+            return AnimatedEntity.super.getRenderAnimationTick(partialTicks);
         float o = 0.0F;
         if (!this.isPassenger() && this.isAlive()) {
             o = this.animationPosition - this.animationSpeed * (1.0F - partialTicks);
