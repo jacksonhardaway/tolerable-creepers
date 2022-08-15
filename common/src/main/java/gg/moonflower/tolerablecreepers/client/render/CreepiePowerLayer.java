@@ -2,6 +2,7 @@ package gg.moonflower.tolerablecreepers.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import gg.moonflower.pollen.pinwheel.api.client.animation.AnimatedGeometryEntityModel;
+import gg.moonflower.pollen.pinwheel.api.client.geometry.GeometryModel;
 import gg.moonflower.pollen.pinwheel.api.client.geometry.GeometryModelRenderer;
 import gg.moonflower.pollen.pinwheel.api.client.texture.GeometryTextureManager;
 import gg.moonflower.pollen.pinwheel.api.common.texture.GeometryModelTextureTable;
@@ -36,7 +37,7 @@ public class CreepiePowerLayer extends RenderLayer<Creepie, AnimatedGeometryEnti
             this.getParentModel().copyPropertiesTo(this.model);
             this.model.setupAnim(creepie, f, g, j, k, l);
             this.wrapper.setParent(this.model.getModel());
-            GeometryModelRenderer.render(this.wrapper, TEXTURE, buffer, matrixStack, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F, builder -> TCRenderTypes.applyCreepieArmor(builder, TEXTURE,offset * 0.02F % 1.0F, offset * 0.02F % 1.0F));
+            GeometryModelRenderer.render(this.wrapper, TEXTURE, buffer, matrixStack, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F, builder -> TCRenderTypes.applyCreepieArmor(builder, TEXTURE, offset * 0.02F % 1.0F, offset * 0.02F % 1.0F));
         }
     }
 }

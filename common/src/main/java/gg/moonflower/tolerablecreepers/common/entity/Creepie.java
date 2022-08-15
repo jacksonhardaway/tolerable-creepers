@@ -78,8 +78,11 @@ public class Creepie extends Creeper implements AnimatedEntity {
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
     private final AnimationEffectHandler effectHandler;
-    private int animationTick;
     private AnimationState animationState;
+    private AnimationState transitionAnimationState;
+    private int animationTick;
+    private int animationTransitionTick;
+    private int animationTransitionLength;
 
     @Nullable
     private UUID ownerUUID;
@@ -89,7 +92,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public Creepie(EntityType<? extends Creepie> entityType, Level level) {
         super(entityType, level);
         this.effectHandler = new AnimationEffectHandler(this);
-        this.animationState = AnimationState.EMPTY;
+        this.animationState = IDLE;
     }
 
     public Creepie(Level level, @Nullable Entity owner, boolean powered) {
@@ -97,6 +100,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.setOwner(owner);
         ((CreeperExtension) this).tolerablecreepers$setPowered(powered);
         this.updateState();
+        this.animationState = IDLE;
     }
 
     @Override
@@ -140,8 +144,9 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     @Override
     public float getRenderAnimationTick(float partialTicks) {
-        if (!this.isNoAnimationPlaying())
-            return AnimatedEntity.super.getRenderAnimationTick(partialTicks);
+        if (this.animationState != IDLE){
+            System.out.println(this.animationState);
+            return AnimatedEntity.super.getRenderAnimationTick(partialTicks);}
         float o = 0.0F;
         if (!this.isPassenger() && this.isAlive()) {
             o = this.animationPosition - this.animationSpeed * (1.0F - partialTicks);
@@ -164,24 +169,56 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     @Override
+    public int getAnimationTransitionTick() {
+        return animationTransitionTick;
+    }
+
+    @Override
+    public void setAnimationTransitionTick(int animationTransitionTick) {
+        this.animationTransitionTick = animationTransitionTick;
+    }
+
+    @Override
+    public int getAnimationTransitionLength() {
+        return animationTransitionLength;
+    }
+
+    @Override
+    public void setAnimationTransitionLength(int animationTransitionLength) {
+        this.animationTransitionLength = animationTransitionLength;
+    }
+
+    @Override
     public AnimationState getAnimationState() {
         return animationState;
     }
 
     @Override
-    public AnimationState getIdleAnimationState() {
-        return IDLE;
+    public AnimationState getTransitionAnimationState() {
+        return transitionAnimationState;
     }
 
     @Override
     public void setAnimationState(AnimationState state) {
+        this.onAnimationStop(this.animationState);
         this.animationState = state;
+        this.setAnimationTick(0);
+        this.setAnimationTransitionLength(0);
     }
 
-    @Nullable
+    @Override
+    public void setTransitionAnimationState(AnimationState state) {
+        this.transitionAnimationState = state;
+    }
+
     @Override
     public AnimationEffectHandler getAnimationEffects() {
         return effectHandler;
+    }
+
+    @Override
+    public AnimationState getIdleAnimationState() {
+        return IDLE;
     }
 
     @Override
@@ -219,8 +256,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {
             return this.cachedOwner;
         } else if (this.ownerUUID != null && this.level instanceof ServerLevel) {
-            this.cachedOwner = ((ServerLevel) this.level).getEntity(this.ownerUUID);
-            return this.cachedOwner;
+            return this.cachedOwner = ((ServerLevel) this.level).getEntity(this.ownerUUID);
         } else {
             return null;
         }
