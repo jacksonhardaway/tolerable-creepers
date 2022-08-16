@@ -10,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -20,6 +21,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Random;
 
 public class CreeperSpores extends ThrowableProjectile {
 
@@ -133,19 +136,23 @@ public class CreeperSpores extends ThrowableProjectile {
     }
 
     private void spawnParticleSphere(Vec3 pos, int amount, float cloudSize) {
+        spawnParticleSphere(this, this.random, pos, amount, cloudSize);
+    }
+
+    public static void spawnParticleSphere(Entity entity, Random random, Vec3 pos, int amount, float cloudSize) {
         for (int i = 0; i < 4 * amount * cloudSize; i++) {
-            float theta = (float) (this.random.nextFloat() * 2 * Math.PI);
-            float phi = (float) (this.random.nextFloat() * 2 * Math.PI);
+            float theta = (float) (random.nextFloat() * 2 * Math.PI);
+            float phi = (float) (random.nextFloat() * 2 * Math.PI);
 
-            double xPos = Mth.sin(phi) * Mth.cos(theta) * cloudSize * this.random.nextFloat();
-            double yPos = Mth.sin(phi) * Mth.sin(theta) * cloudSize * this.random.nextFloat();
-            double zPos = Mth.cos(phi) * cloudSize * this.random.nextFloat();
+            double xPos = Mth.sin(phi) * Mth.cos(theta) * cloudSize * random.nextFloat();
+            double yPos = Mth.sin(phi) * Mth.sin(theta) * cloudSize * random.nextFloat();
+            double zPos = Mth.cos(phi) * cloudSize * random.nextFloat();
 
-            if (this.level.clip(new ClipContext(pos, pos.add(xPos, yPos, zPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS) {
-                if (this.level.isClientSide()) {
-                    this.level.addParticle(TCParticles.CREEPER_SPORES.get(), true, pos.x() + xPos, pos.y() + yPos, pos.z() + zPos, 0.0D, 0.0D, 0.0D);
+            if (entity.level.clip(new ClipContext(pos, pos.add(xPos, yPos, zPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS) {
+                if (entity.level.isClientSide()) {
+                    entity.level.addParticle(TCParticles.CREEPER_SPORES.get(), true, pos.x() + xPos, pos.y() + yPos, pos.z() + zPos, 0.0D, 0.0D, 0.0D);
                 } else {
-                    ((ServerLevel) this.level).sendParticles(TCParticles.CREEPER_SPORES.get(), pos.x() + xPos, pos.y() + yPos, pos.z() + zPos, 1, 0.0D, 0.0D, 0.0D, 0.0);
+                    ((ServerLevel) entity.level).sendParticles(TCParticles.CREEPER_SPORES.get(), pos.x() + xPos, pos.y() + yPos, pos.z() + zPos, 1, 0.0D, 0.0D, 0.0D, 0.0);
                 }
             }
         }

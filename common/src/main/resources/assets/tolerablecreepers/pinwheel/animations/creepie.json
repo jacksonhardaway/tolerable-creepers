@@ -8,6 +8,24 @@
 					"rotation": [ "q.head_x_rotation", "q.head_y_rotation", 0 ]
 				}
 			}
+		},
+		"creepie_simple_walk": {
+			"loop": true,
+			"blend_weight": "1.4 * q.limb_swing_amount",
+			"bones": {
+				"r_leg_back": {
+					"rotation": [ "math.cos(q.limb_swing * 180 / math.pi * 2/3)", 0, 0 ]
+				},
+				"l_leg_back": {
+					"rotation": [ "math.cos(q.limb_swing * 180 / math.pi * 2/3 + 180)", 0, 0 ]
+				},
+				"r_leg_front": {
+					"rotation": [ "math.cos(q.limb_swing * 180 / math.pi * 2/3 + 180)", 0, 0 ]
+				},
+				"l_leg_front": {
+					"rotation": [ "math.cos(q.limb_swing * 180 / math.pi * 2/3)", 0, 0 ]
+				}
+			}
 		}
 	}
 }

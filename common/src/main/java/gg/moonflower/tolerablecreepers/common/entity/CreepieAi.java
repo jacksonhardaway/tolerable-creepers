@@ -47,7 +47,7 @@ public class CreepieAi {
     private static void initCoreActivity(Brain<Creepie> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new LookAtTargetSink(45, 90),
-                new MoveToTargetSink(),
+                new RunIf<>(Creepie::canMove, new MoveToTargetSink(), true),
                 new StopBeingAngryIfTargetDead<>()
         ));
     }
@@ -108,6 +108,10 @@ public class CreepieAi {
         } else if (creepie.isDancing()) {
             creepie.resetAnimationState();
         }
+
+        boolean hasFriend = brain.hasMemoryValue(TCEntities.NEARBY_FRIEND_MEMORY.get());
+        if (creepie.isSad() == hasFriend)
+            creepie.setSad(!hasFriend);
     }
 
     protected static void wasHurtBy(Creepie creepie, LivingEntity attacker) {
