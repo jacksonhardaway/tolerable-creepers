@@ -16,5 +16,6 @@ public class TCTags {
     public static TagKey<EntityType<?>> CREEPIE_FRIENDS = TagRegistry.bindEntityType(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_friends"));
 
     public static TagKey<Block> CREEPIE_REPELLENTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_repellents"));
-    public static TagKey<Block> CREEPIE_HIDING_SPOT = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hiding_spots"));
+    public static TagKey<Block> CREEPIE_HIDING_SPOTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hiding_spots"));
+    public static TagKey<Block> CREEPIE_PARTY_SPOTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_party_spots"));
 }

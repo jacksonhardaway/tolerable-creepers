@@ -16,6 +16,7 @@ public class TCBlockTagProvider extends PollinatedBlockTagsProvider {
     protected void addTags() {
         super.addTags();
         this.tag(TCTags.CREEPIE_REPELLENTS);
-        this.tag(TCTags.CREEPIE_HIDING_SPOT).add(Blocks.AZALEA, Blocks.FLOWERING_AZALEA);
+        this.tag(TCTags.CREEPIE_HIDING_SPOTS).add(Blocks.AZALEA, Blocks.FLOWERING_AZALEA);
+        this.tag(TCTags.CREEPIE_PARTY_SPOTS).add(Blocks.JUKEBOX, Blocks.SPORE_BLOSSOM);
     }
 }

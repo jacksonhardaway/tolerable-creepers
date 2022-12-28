@@ -5,10 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
+import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationState;
 import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieAttack;
+import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieDance;
 import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieHide;
 import gg.moonflower.tolerablecreepers.common.entity.ai.CreepiePlayTag;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
+import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.Optional;
 
@@ -57,6 +61,7 @@ public class CreepieAi {
         brain.addActivity(Activity.IDLE, 0, ImmutableList.of(
                 new SetEntityLookTarget(8.0F),
                 new StartAttacking<>(CreepieAi::findNearestValidAttackTarget),
+                new CreepieDance(),
                 avoidRepellent(),
                 createIdleLookBehaviors(),
                 createIdleMovementBehaviors()
@@ -68,7 +73,12 @@ public class CreepieAi {
     }
 
     private static void initCelebrateActivity(Brain<Creepie> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 5, ImmutableList.of(avoidRepellent(), new StartAttacking<>(CreepieAi::findNearestValidAttackTarget), new RunIf<>(creepie -> creepie.getAnimationState() != Creepie.DANCE, new GoToCelebrateLocation<>(2, 1.0F)), new RunIf<>(Creepie::isDancing, new GoToCelebrateLocation<>(4, 0.6F)), new RunOne<>(ImmutableList.of(Pair.of(new SetEntityLookTarget(TCEntities.CREEPIE.get(), 8.0F), 1), Pair.of(new DoNothing(10, 20), 1)))), MemoryModuleType.CELEBRATE_LOCATION);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 5, ImmutableList.of(
+                avoidRepellent(),
+                new StartAttacking<>(CreepieAi::findNearestValidAttackTarget),
+                new CreepieDance(),
+                new RunOne<>(ImmutableList.of(Pair.of(new SetEntityLookTarget(TCEntities.CREEPIE.get(), 8.0F), 1), Pair.of(new DoNothing(10, 20), 1)))
+        ), MemoryModuleType.DANCING);
     }
 
     private static void initRetreatActivity(Brain<Creepie> brain) {
@@ -80,6 +90,7 @@ public class CreepieAi {
                 Pair.of(99, new StartAttacking<>(CreepieAi::findNearestValidAttackTarget)),
                 Pair.of(0, new MoveToTargetSink(80, 120)),
                 Pair.of(5, createIdleLookBehaviors()),
+                Pair.of(5, new CreepieDance()),
                 Pair.of(5, new CreepiePlayTag()),
                 Pair.of(8, new CreepieHide()),
                 Pair.of(
@@ -122,17 +133,26 @@ public class CreepieAi {
 
         creepie.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 
+        BlockPos celebration = brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).orElse(null);
+        if (celebration == null || !celebration.closerToCenterThan(creepie.position(), Creepie.PARTY_DISTANCE) || !creepie.level.getBlockState(celebration).is(TCTags.CREEPIE_PARTY_SPOTS)) {
+            brain.eraseMemory(MemoryModuleType.CELEBRATE_LOCATION);
+        }
+
         if (!brain.hasMemoryValue(MemoryModuleType.CELEBRATE_LOCATION)) {
             brain.eraseMemory(MemoryModuleType.DANCING);
+        } else {
+            if (celebration != null && creepie.level.getBlockState(celebration).is(Blocks.JUKEBOX)) {
+                brain.setMemory(MemoryModuleType.DANCING, true);
+            }
         }
 
         if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
-            if (!creepie.isDancing()) {
-                AnimatedEntity.setAnimation(creepie, Creepie.DANCE);
+            creepie.getNavigation().stop();
+            if (!creepie.isDancing() && !creepie.isAnimationTransitioning()) {
+                AnimatedEntity.setAnimation(creepie, Creepie.DANCE, 5);
             }
-        } else if (creepie.isDancing()) {
-            creepie.resetAnimationState();
-            AnimatedEntity.setAnimation(creepie, creepie.getAnimationState(), creepie.getAnimationTransitionLength());
+        } else if (creepie.isDancing() && !creepie.isAnimationTransitioning()) {
+            AnimatedEntity.setAnimation(creepie, AnimationState.EMPTY, 2);
         }
 
         boolean shouldBeSad = creepie.getCreepieType() != Creepie.CreepieType.ENRAGED && brain.getMemory(TCEntities.HAS_FRIENDS.get()).orElse(false);

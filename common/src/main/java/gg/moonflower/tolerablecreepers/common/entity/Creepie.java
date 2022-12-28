@@ -11,6 +11,7 @@ import gg.moonflower.tolerablecreepers.core.extension.CreeperExtension;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCItems;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -62,9 +63,13 @@ public class Creepie extends Creeper implements AnimatedEntity {
      */
     public static final double CREEPER_DISTANCE = 32.0D;
     /**
-     * After 6000 ticks (2 minutes) of a creepie being sad, it disappears
+     * After 6000 ticks (2 minutes) of a creepie being sad, it disappears.
      */
     public static final int MAXIMUM_SAD_TIME = 6000;
+    /**
+     * The distance to check for jukeboxes and spore blossoms.
+     */
+    public static final float PARTY_DISTANCE = 8.0F;
 
     protected static final ImmutableList<SensorType<? extends Sensor<? super Creepie>>> SENSOR_TYPES = ImmutableList.of(
             SensorType.NEAREST_LIVING_ENTITIES,
@@ -494,7 +499,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     public boolean isHiding() {
-        return this.brain.hasMemoryValue(TCEntities.HIDING_SPOT.get()) || this.level.getBlockState(this.blockPosition()).is(TCTags.CREEPIE_HIDING_SPOT);
+        return this.brain.hasMemoryValue(TCEntities.HIDING_SPOT.get()) || this.level.getBlockState(this.blockPosition()).is(TCTags.CREEPIE_HIDING_SPOTS);
     }
 
     public enum CreepieType {
