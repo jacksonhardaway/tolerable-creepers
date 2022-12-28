@@ -4,6 +4,7 @@ import gg.moonflower.pollen.api.datagen.provider.tags.PollinatedBlockTagsProvide
 import gg.moonflower.pollen.api.util.PollinatedModContainer;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.world.level.block.Blocks;
 
 public class TCBlockTagProvider extends PollinatedBlockTagsProvider {
 
@@ -15,5 +16,6 @@ public class TCBlockTagProvider extends PollinatedBlockTagsProvider {
     protected void addTags() {
         super.addTags();
         this.tag(TCTags.CREEPIE_REPELLENTS);
+        this.tag(TCTags.CREEPIE_HIDING_SPOT).add(Blocks.AZALEA, Blocks.FLOWERING_AZALEA);
     }
 }

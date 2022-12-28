@@ -57,12 +57,13 @@ public class TolerableCreepers {
         ParticleFactoryRegistryEvent.EVENT.register(TCParticles::registerParticles);
         ModelRegistry.registerSpecial(new ResourceLocation(MOD_ID, "entity/fire_bomb"));
         ModelRegistry.registerSpecial(new ResourceLocation(MOD_ID, "entity/spore_bomb"));
-    }
 
-    private static void onClientPostInit(Platform.ModSetupContext ctx) {
         EntityRendererRegistry.register(TCEntities.CREEPER_SPORES, NoopRenderer::new);
         EntityRendererRegistry.register(TCEntities.CREEPIE, CreepieRenderer::new);
         EntityRendererRegistry.register(TCEntities.SPORE_BARREL, SporeBarrelRenderer::new);
+    }
+
+    private static void onClientPostInit(Platform.ModSetupContext ctx) {
     }
 
     private static void onCommonInit() {
@@ -124,6 +125,7 @@ public class TolerableCreepers {
         DataGenerator generator = ctx.getGenerator();
         PollinatedModContainer container = ctx.getMod();
         generator.addProvider(new TCLanguageProvider(generator, container));
+        generator.addProvider(new TCBlockTagProvider(generator, container));
         generator.addProvider(new TCEntityTypeTagProvider(generator, container));
         generator.addProvider(new TCRecipeProvider(generator));
         PollinatedModelProvider modelProvider = new PollinatedModelProvider(generator, container);

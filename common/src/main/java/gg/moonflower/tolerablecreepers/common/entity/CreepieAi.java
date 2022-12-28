@@ -1,13 +1,15 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
 import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieAttack;
+import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieHide;
+import gg.moonflower.tolerablecreepers.common.entity.ai.CreepiePlayTag;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -15,11 +17,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.ai.util.LandRandomPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -33,6 +33,7 @@ public class CreepieAi {
         initFightActivity(creepie, brain);
         initCelebrateActivity(brain);
         initRetreatActivity(brain);
+        initPlayActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
@@ -58,8 +59,7 @@ public class CreepieAi {
                 new StartAttacking<>(CreepieAi::findNearestValidAttackTarget),
                 avoidRepellent(),
                 createIdleLookBehaviors(),
-                createIdleMovementBehaviors(),
-                new SetLookAndInteract(EntityType.PLAYER, 4)
+                createIdleMovementBehaviors()
         ));
     }
 
@@ -73,6 +73,30 @@ public class CreepieAi {
 
     private static void initRetreatActivity(Brain<Creepie> brain) {
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(avoidRepellent(), SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.0F, 12, true), createIdleLookBehaviors(), createIdleMovementBehaviors()), MemoryModuleType.AVOID_TARGET);
+    }
+
+    private static void initPlayActivity(Brain<Creepie> brain) {
+        brain.addActivity(Activity.PLAY, ImmutableList.of(
+                Pair.of(99, new StartAttacking<>(CreepieAi::findNearestValidAttackTarget)),
+                Pair.of(0, new MoveToTargetSink(80, 120)),
+                Pair.of(5, createIdleLookBehaviors()),
+                Pair.of(5, new CreepiePlayTag()),
+                Pair.of(8, new CreepieHide()),
+                Pair.of(
+                        5,
+                        new RunOne<>(
+                                ImmutableMap.of(MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryStatus.VALUE_ABSENT),
+                                ImmutableList.of(
+                                        Pair.of(InteractWith.of(EntityType.CREEPER, 8, MemoryModuleType.INTERACTION_TARGET, 0.5F, 2), 2),
+                                        Pair.of(InteractWith.of(TCEntities.CREEPIE.get(), 8, MemoryModuleType.INTERACTION_TARGET, 0.5F, 2), 1),
+                                        Pair.of(createIdleMovementBehaviors(), 1),
+                                        Pair.of(new SetWalkTargetFromLookTarget(0.5F, 2), 1),
+                                        Pair.of(new CreepieHide(), 2),
+                                        Pair.of(new DoNothing(20, 40), 2)
+                                )
+                        )
+                )
+        ));
     }
 
     private static RunOne<Creepie> createIdleLookBehaviors() {
@@ -89,13 +113,12 @@ public class CreepieAi {
 
     protected static void updateActivity(Creepie creepie) {
         Brain<Creepie> brain = creepie.getBrain();
-        Activity activity = brain.getActiveNonCoreActivity().orElse(null);
-        brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.CELEBRATE, Activity.IDLE));
-        Activity activity2 = brain.getActiveNonCoreActivity().orElse(null);
 
-//        if (activity != activity2) {
-//            getSoundForCurrentActivity(creepie).ifPresent(creepie::playSound);
-//        }
+        if (creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY) {
+            brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.CELEBRATE, Activity.PLAY, Activity.IDLE));
+        } else {
+            brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.IDLE));
+        }
 
         creepie.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 
@@ -104,14 +127,18 @@ public class CreepieAi {
         }
 
         if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
-            creepie.setAnimationState(Creepie.DANCE);
+            if (!creepie.isDancing()) {
+                AnimatedEntity.setAnimation(creepie, Creepie.DANCE);
+            }
         } else if (creepie.isDancing()) {
             creepie.resetAnimationState();
+            AnimatedEntity.setAnimation(creepie, creepie.getAnimationState(), creepie.getAnimationTransitionLength());
         }
 
-        boolean hasFriend = brain.hasMemoryValue(TCEntities.NEARBY_FRIEND_MEMORY.get());
-        if (creepie.isSad() == hasFriend)
-            creepie.setSad(!hasFriend);
+        boolean shouldBeSad = creepie.getCreepieType() != Creepie.CreepieType.ENRAGED && brain.getMemory(TCEntities.HAS_FRIENDS.get()).orElse(false);
+        if (creepie.isSad() == shouldBeSad) {
+            creepie.setSad(!shouldBeSad);
+        }
     }
 
     protected static void wasHurtBy(Creepie creepie, LivingEntity attacker) {
@@ -119,6 +146,7 @@ public class CreepieAi {
             Brain<Creepie> brain = creepie.getBrain();
             brain.eraseMemory(MemoryModuleType.CELEBRATE_LOCATION);
             brain.eraseMemory(MemoryModuleType.DANCING);
+            brain.eraseMemory(TCEntities.HIDING_SPOT.get());
 
             getAvoidTarget(creepie).ifPresent(avoidTarget -> {
                 if (avoidTarget.getType() != attacker.getType())
@@ -140,60 +168,7 @@ public class CreepieAi {
         return creepie.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE);
     }
 
-    public static Optional<SoundEvent> getSoundForCurrentActivity(Creepie piglin) {
-        return piglin.getBrain().getActiveNonCoreActivity().map(activity -> getSoundForActivity(piglin, activity));
-    }
-
-    private static SoundEvent getSoundForActivity(Creepie piglin, Activity activity) {
-        if (activity == Activity.FIGHT) {
-            return SoundEvents.PIGLIN_ANGRY;
-        } else if (activity == Activity.AVOID && isNearAvoidTarget(piglin)) {
-            return SoundEvents.PIGLIN_RETREAT;
-        } else if (activity == Activity.ADMIRE_ITEM) {
-            return SoundEvents.PIGLIN_ADMIRING_ITEM;
-        } else if (activity == Activity.CELEBRATE) {
-            return SoundEvents.PIGLIN_CELEBRATE;
-        } else {
-            return isNearRepellent(piglin) ? SoundEvents.PIGLIN_RETREAT : SoundEvents.PIGLIN_AMBIENT;
-        }
-    }
-
-    private static boolean isNearAvoidTarget(Creepie creepie) {
-        Brain<Creepie> brain = creepie.getBrain();
-        return brain.hasMemoryValue(MemoryModuleType.AVOID_TARGET) && brain.getMemory(MemoryModuleType.AVOID_TARGET).get().closerThan(creepie, 12.0);
-    }
-
-    private static void stopWalking(Creepie piglin) {
-        piglin.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-        piglin.getNavigation().stop();
-    }
-
-    private static Optional<LivingEntity> getAngerTarget(Creepie creepie) {
-        return BehaviorUtils.getLivingEntityFromUUIDMemory(creepie, MemoryModuleType.ANGRY_AT);
-    }
-
     public static Optional<LivingEntity> getAvoidTarget(Creepie creepie) {
         return creepie.getBrain().hasMemoryValue(MemoryModuleType.AVOID_TARGET) ? creepie.getBrain().getMemory(MemoryModuleType.AVOID_TARGET) : Optional.empty();
-    }
-
-    public static Optional<Player> getNearestVisibleTargetablePlayer(Creepie abstractCreepie) {
-        return abstractCreepie.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER) ? abstractCreepie.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER) : Optional.empty();
-    }
-
-    private static Vec3 getRandomNearbyPos(Creepie creepie) {
-        Vec3 vec3 = LandRandomPos.getPos(creepie, 4, 2);
-        return vec3 == null ? creepie.position() : vec3;
-    }
-
-    protected static boolean isIdle(Creepie creepie) {
-        return creepie.getBrain().isActive(Activity.IDLE);
-    }
-
-    private static boolean isNearRepellent(Creepie creepie) {
-        return creepie.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_REPELLENT);
-    }
-
-    private static boolean wasHurtRecently(LivingEntity entity) {
-        return entity.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY);
     }
 }

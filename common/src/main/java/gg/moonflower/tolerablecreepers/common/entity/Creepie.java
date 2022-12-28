@@ -53,7 +53,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public static final AnimationState WALK = new AnimationState(0, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_walk"));
     public static final AnimationState HURT = new AnimationState(10, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hurt"));
     public static final AnimationState SAD = new AnimationState(40, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_simple_walk"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_sad"));
-    public static final AnimationState HIDE = new AnimationState(0, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hide"));
+    public static final AnimationState HIDE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hide"));
     public static final AnimationState DANCE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_dance"));
     private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE, IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
 
@@ -80,7 +80,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
             MemoryModuleType.NEAREST_VISIBLE_PLAYER,
             MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
-            TCEntities.NEARBY_FRIEND_MEMORY.get(),
+            MemoryModuleType.VISIBLE_VILLAGER_BABIES,
             MemoryModuleType.HURT_BY,
             MemoryModuleType.HURT_BY_ENTITY,
             MemoryModuleType.WALK_TARGET,
@@ -92,7 +92,9 @@ public class Creepie extends Creeper implements AnimatedEntity {
             MemoryModuleType.AVOID_TARGET,
             MemoryModuleType.CELEBRATE_LOCATION,
             MemoryModuleType.DANCING,
-            MemoryModuleType.NEAREST_REPELLENT
+            MemoryModuleType.NEAREST_REPELLENT,
+            TCEntities.HIDING_SPOT.get(),
+            TCEntities.HAS_FRIENDS.get()
     );
 
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
@@ -196,18 +198,32 @@ public class Creepie extends Creeper implements AnimatedEntity {
         super.tick();
         AnimatedEntity.super.animationTick();
         if (!this.isAnimationPlaying(SAD) && !this.isAnimationPlaying(DANCE) && !this.isAnimationTransitioning()) {
+            boolean hiding = this.isHiding();
             if (this.level.isClientSide()) {
+                if (hiding) {
+                    if (!this.isAnimationPlaying(HIDE)) {
+                        this.setAnimationState(HIDE, 3);
+                    }
+                    return;
+                } else if (this.isAnimationPlaying(HIDE)) {
+                    this.setAnimationState(AnimationState.EMPTY, 3);
+                    return;
+                }
+
                 if ((!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) > 1E-6) {
-                    if (!this.isNoAnimationPlaying())
+                    if (!this.isNoAnimationPlaying()) {
                         this.setAnimationState(AnimationState.EMPTY);
+                    }
                 } else if (this.isNoAnimationPlaying()) {
                     this.setAnimationState(IDLE);
                 }
-            } else if (this.isNoAnimationPlaying() && (!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) <= 1E-6) {
-                if (this.noveltyTimer <= 0)
+            } else if (!hiding && this.isNoAnimationPlaying() && (!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) <= 1E-6) {
+                if (this.noveltyTimer <= 0) {
                     this.noveltyTimer = (2 + this.random.nextInt(9)) * 20; // Every 2-10 seconds, do the novelty animation
-                if (--this.noveltyTimer <= 0) // Subtract before compare
+                }
+                if (--this.noveltyTimer <= 0) { // Subtract before compare
                     AnimatedEntity.setAnimation(this, IDLE_NOVELTY);
+                }
             }
         }
     }
@@ -222,7 +238,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         if (this.sadTimer > 0) {
             this.sadTimer--;
             if (this.sadTimer <= 0) {
-                AnimatedEntity.setAnimation(this, SAD, 5);
+                AnimatedEntity.setAnimation(this, SAD);
                 return;
             }
         }
@@ -293,6 +309,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     @Override
     public void setAnimationState(AnimationState state) {
+        if (this.animationState == SAD) // Ignore new animations if currently sad
+            return;
         this.onAnimationStop(this.animationState);
         this.animationState = state;
         this.setAnimationTick(0);
@@ -448,8 +466,9 @@ public class Creepie extends Creeper implements AnimatedEntity {
         boolean bl = super.hurt(source, amount);
         if (bl && !this.level.isClientSide()) {
             AnimatedEntity.setAnimation(this, HURT);
-            if (source.getEntity() instanceof LivingEntity livingAttacker)
+            if (source.getEntity() instanceof LivingEntity livingAttacker) {
                 CreepieAi.wasHurtBy(this, livingAttacker);
+            }
         }
         return bl;
     }
@@ -474,8 +493,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
         return this.isNoAnimationPlaying();
     }
 
-    public boolean isFriend(LivingEntity other) {
-        return other.getType().is(TCTags.CREEPIE_FRIEND);
+    public boolean isHiding() {
+        return this.brain.hasMemoryValue(TCEntities.HIDING_SPOT.get()) || this.level.getBlockState(this.blockPosition()).is(TCTags.CREEPIE_HIDING_SPOT);
     }
 
     public enum CreepieType {
