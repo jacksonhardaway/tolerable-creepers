@@ -73,12 +73,12 @@ public class CreepieAi {
     }
 
     private static void initCelebrateActivity(Brain<Creepie> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 5, ImmutableList.of(
-                avoidRepellent(),
-                new StartAttacking<>(CreepieAi::findNearestValidAttackTarget),
-                new CreepieDance(),
-                new RunOne<>(ImmutableList.of(Pair.of(new SetEntityLookTarget(TCEntities.CREEPIE.get(), 8.0F), 1), Pair.of(new DoNothing(10, 20), 1)))
-        ), MemoryModuleType.DANCING);
+        brain.addActivityAndRemoveMemoriesWhenStopped(Activity.CELEBRATE, ImmutableList.of(
+                Pair.of(5, avoidRepellent()),
+                Pair.of(6, new StartAttacking<>(CreepieAi::findNearestValidAttackTarget)),
+                Pair.of(7, new CreepieDance()),
+                Pair.of(8, new RunOne<>(ImmutableList.of(Pair.of(new SetEntityLookTarget(TCEntities.CREEPIE.get(), 8.0F), 1), Pair.of(new DoNothing(10, 20), 1))))
+        ), ImmutableSet.of(Pair.of(MemoryModuleType.DANCING, MemoryStatus.VALUE_PRESENT)), ImmutableSet.of(MemoryModuleType.DANCING));
     }
 
     private static void initRetreatActivity(Brain<Creepie> brain) {
