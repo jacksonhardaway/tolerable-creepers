@@ -243,6 +243,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             this.sadTimer--;
             if (this.sadTimer <= 0) {
                 AnimatedEntity.setAnimation(this, SAD);
+                this.getNavigation().stop();
                 return;
             }
         }
@@ -490,7 +491,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     public boolean isSad() {
-        return this.sadTimer > 0;
+        return this.sadTimer > 0 || this.isAnimationPlaying(SAD);
     }
 
     public boolean canMove() {

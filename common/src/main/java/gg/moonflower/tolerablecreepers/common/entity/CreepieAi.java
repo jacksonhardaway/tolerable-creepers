@@ -125,7 +125,7 @@ public class CreepieAi {
     protected static void updateActivity(Creepie creepie) {
         Brain<Creepie> brain = creepie.getBrain();
 
-        if (creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY) {
+        if (creepie.getCreepieType() != Creepie.CreepieType.ENRAGED) {
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.CELEBRATE, Activity.PLAY, Activity.IDLE));
         } else {
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.IDLE));
@@ -133,7 +133,7 @@ public class CreepieAi {
 
         creepie.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 
-        BlockPos celebration = creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY ? brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).orElse(null) : null;
+        BlockPos celebration = creepie.getCreepieType() != Creepie.CreepieType.ENRAGED ? brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).orElse(null) : null;
         if (celebration == null || !celebration.closerToCenterThan(creepie.position(), Creepie.PARTY_DISTANCE) || !creepie.level.getBlockState(celebration).is(TCTags.CREEPIE_PARTY_SPOTS)) {
             brain.eraseMemory(MemoryModuleType.CELEBRATE_LOCATION);
         }
@@ -146,13 +146,17 @@ public class CreepieAi {
             }
         }
 
-        if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
-            creepie.getNavigation().stop();
-            if (!creepie.isDancing() && !creepie.isAnimationTransitioning()) {
-                AnimatedEntity.setAnimation(creepie, Creepie.DANCE, 5);
+        if (!creepie.isSad()) {
+            if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
+                creepie.getNavigation().stop();
+                if (!creepie.isDancing() && !creepie.isAnimationTransitioning()) {
+                    AnimatedEntity.setAnimation(creepie, Creepie.DANCE, 5);
+                }
+            } else if (creepie.isDancing() && !creepie.isAnimationTransitioning()) {
+                AnimatedEntity.setAnimation(creepie, AnimationState.EMPTY, 2);
             }
-        } else if (creepie.isDancing() && !creepie.isAnimationTransitioning()) {
-            AnimatedEntity.setAnimation(creepie, AnimationState.EMPTY, 2);
+        } else {
+            brain.eraseMemory(MemoryModuleType.DANCING);
         }
 
         boolean shouldBeSad = creepie.getCreepieType() != Creepie.CreepieType.ENRAGED && brain.getMemory(TCEntities.HAS_FRIENDS.get()).orElse(false);
