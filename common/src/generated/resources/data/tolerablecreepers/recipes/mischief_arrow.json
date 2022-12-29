@@ -5,10 +5,10 @@
       "item": "minecraft:arrow"
     },
     {
-      "item": "tolerablecreepers:creepers_spores"
+      "item": "minecraft:arrow"
     },
     {
-      "item": "minecraft:arrow"
+      "item": "tolerablecreepers:creeper_spores"
     }
   ],
   "result": {

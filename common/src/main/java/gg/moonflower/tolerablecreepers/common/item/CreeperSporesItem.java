@@ -32,8 +32,9 @@ public class CreeperSporesItem extends Item {
         }
 
         player.awardStat(Stats.ITEM_USED.get(this));
-        if (!player.getAbilities().instabuild)
+        if (!player.isCreative()) {
             stack.shrink(1);
+        }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }

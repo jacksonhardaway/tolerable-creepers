@@ -7,9 +7,11 @@ import gg.moonflower.pollen.api.event.events.world.ExplosionEvents;
 import gg.moonflower.pollen.api.platform.Platform;
 import gg.moonflower.pollen.api.registry.EntityAttributeRegistry;
 import gg.moonflower.pollen.api.registry.client.EntityRendererRegistry;
+import gg.moonflower.pollen.api.registry.client.ItemPredicateRegistry;
 import gg.moonflower.pollen.api.registry.client.ModelRegistry;
 import gg.moonflower.pollen.api.util.PollinatedModContainer;
 import gg.moonflower.tolerablecreepers.client.render.CreepieRenderer;
+import gg.moonflower.tolerablecreepers.client.render.MischiefArrowRenderer;
 import gg.moonflower.tolerablecreepers.client.render.SporeBarrelRenderer;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
@@ -19,6 +21,7 @@ import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,7 +35,9 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -61,6 +66,17 @@ public class TolerableCreepers {
         EntityRendererRegistry.register(TCEntities.CREEPER_SPORES, NoopRenderer::new);
         EntityRendererRegistry.register(TCEntities.CREEPIE, CreepieRenderer::new);
         EntityRendererRegistry.register(TCEntities.SPORE_BARREL, SporeBarrelRenderer::new);
+        EntityRendererRegistry.register(TCEntities.MISCHIEF_ARROW, MischiefArrowRenderer::new);
+
+        ItemPredicateRegistry.register(
+                Items.CROSSBOW,
+                new ResourceLocation(MOD_ID, "mischief_arrow"),
+                (itemStack, clientLevel, livingEntity, i) -> livingEntity != null
+                        && CrossbowItem.isCharged(itemStack)
+                        && CrossbowItem.containsChargedProjectile(itemStack, TCItems.MISCHIEF_ARROW.get())
+                        ? 1.0F
+                        : 0.0F
+        );
     }
 
     private static void onClientPostInit(Platform.ModSetupContext ctx) {
@@ -125,9 +141,11 @@ public class TolerableCreepers {
         DataGenerator generator = ctx.getGenerator();
         PollinatedModContainer container = ctx.getMod();
         generator.addProvider(new TCLanguageProvider(generator, container));
-        generator.addProvider(new TCBlockTagProvider(generator, container));
-        generator.addProvider(new TCEntityTypeTagProvider(generator, container));
         generator.addProvider(new TCRecipeProvider(generator));
+        BlockTagsProvider blockTagProvider = new TCBlockTagProvider(generator, container);
+        generator.addProvider(blockTagProvider);
+        generator.addProvider(new TCItemTagProvider(generator, container, blockTagProvider));
+        generator.addProvider(new TCEntityTypeTagProvider(generator, container));
         PollinatedModelProvider modelProvider = new PollinatedModelProvider(generator, container);
         modelProvider.addGenerator(TCBlockModelProvider::new);
         modelProvider.addGenerator(TCItemModelProvider::new);

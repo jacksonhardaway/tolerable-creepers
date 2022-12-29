@@ -17,6 +17,7 @@ public class TCLanguageProvider extends PollinatedLanguageProvider {
     protected void registerTranslations() {
         this.addBlock(TCBlocks.SPORE_BARREL, "Spore Barrel");
         this.addItem(TCItems.CREEPER_SPORES, "Creeper Spores");
+        this.addItem(TCItems.MISCHIEF_ARROW, "Mischief Arrow");
         this.addEntityType(TCEntities.CREEPER_SPORES, "Creeper Spores");
         this.addEntityType(TCEntities.CREEPIE, "Creepie");
         this.addEntityType(TCEntities.SPORE_BARREL, "Spore Barrel");

@@ -1,0 +1,6 @@
+{
+    "parent": "item/crossbow",
+    "textures": {
+        "layer0": "tolerablecreepers:item/crossbow_mischief_arrow"
+    }
+}

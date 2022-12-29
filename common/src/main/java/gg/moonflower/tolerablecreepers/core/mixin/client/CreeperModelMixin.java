@@ -6,7 +6,6 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +34,7 @@ public class CreeperModelMixin<T extends Entity> {
         if (dancing) {
             float n = h / 60.0F;
             this.head.x = this.headPose.x + Mth.sin(n * 10.0F) * 0.25F;
-            this.head.y = this.headPose.y + Mth.sin(n * 40.0F) + 1.0F;
+            this.head.y = this.headPose.y + (Mth.sin(n * 40.0F) + 1.0F) * 0.5F;
         } else {
             this.head.loadPose(this.headPose);
         }

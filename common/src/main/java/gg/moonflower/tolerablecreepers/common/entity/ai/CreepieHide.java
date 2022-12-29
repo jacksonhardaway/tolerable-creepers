@@ -18,14 +18,13 @@ public class CreepieHide extends Behavior<Creepie> {
     public CreepieHide() {
         super(ImmutableMap.of(
                 MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT,
-                TCEntities.HIDING_SPOT.get(), MemoryStatus.VALUE_PRESENT,
-                TCEntities.HAS_FRIENDS.get(), MemoryStatus.VALUE_PRESENT
+                TCEntities.HIDING_SPOT.get(), MemoryStatus.VALUE_PRESENT
         ));
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Creepie creepie) {
-        return !creepie.isHiding() && serverLevel.getRandom().nextInt(AVERAGE_WAIT_TIME_BETWEEN_RUNS) == 0 && creepie.getBrain().getMemory(TCEntities.HAS_FRIENDS.get()).orElse(false);
+        return !creepie.isHiding() && serverLevel.getRandom().nextInt(AVERAGE_WAIT_TIME_BETWEEN_RUNS) == 0;
     }
 
     @Override

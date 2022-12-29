@@ -31,7 +31,7 @@ public class CreepieAttackablesSensor extends NearestVisibleLivingEntitySensor {
             return target instanceof Enemy && ((target instanceof Creepie && !this.isFriendlyCreepie(target)) || !(target instanceof Creeper));
         if (creepie.getCreepieType() == Creepie.CreepieType.NORMAL)
             return false;
-        return target instanceof Player || this.isFriendlyCreepie(target);
+        return !(target instanceof Creepie targetCreepie) || targetCreepie.getCreepieType() != Creepie.CreepieType.ENRAGED;
     }
 
     private boolean isFriendlyCreepie(LivingEntity entity) {

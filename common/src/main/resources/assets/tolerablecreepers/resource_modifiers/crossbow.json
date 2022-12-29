@@ -1,0 +1,14 @@
+{	
+	"type": "pollen:model_override",
+	"inject": [
+		"item/crossbow"
+	],
+	"overrides": [
+        {
+            "predicate": {
+                "tolerablecreepers:mischief_arrow": 1
+            },
+            "model": "tolerablecreepers:item/crossbow_mischief_arrow"
+        }
+	]
+}

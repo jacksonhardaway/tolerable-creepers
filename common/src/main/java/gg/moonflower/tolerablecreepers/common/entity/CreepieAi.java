@@ -133,7 +133,7 @@ public class CreepieAi {
 
         creepie.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 
-        BlockPos celebration = brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).orElse(null);
+        BlockPos celebration = creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY ? brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).orElse(null) : null;
         if (celebration == null || !celebration.closerToCenterThan(creepie.position(), Creepie.PARTY_DISTANCE) || !creepie.level.getBlockState(celebration).is(TCTags.CREEPIE_PARTY_SPOTS)) {
             brain.eraseMemory(MemoryModuleType.CELEBRATE_LOCATION);
         }

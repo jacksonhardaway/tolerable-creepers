@@ -53,13 +53,11 @@ public class CreeperSpores extends ThrowableProjectile {
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
         boolean landed = this.hasLanded();
-        if (hitResult != null) {
-            if (hitResult.getType() != HitResult.Type.BLOCK || (!((BlockHitResult) hitResult).isInside() && ((BlockHitResult) hitResult).getDirection() == Direction.UP))
-                this.onGround = true;
-            this.setDeltaMovement(Vec3.ZERO);
-            this.setLanded();
-            this.setPos(hitResult.getLocation());
-        }
+        if (hitResult.getType() != HitResult.Type.BLOCK || (!((BlockHitResult) hitResult).isInside() && ((BlockHitResult) hitResult).getDirection() == Direction.UP))
+            this.onGround = true;
+        this.setDeltaMovement(Vec3.ZERO);
+        this.setLanded();
+        this.setPos(hitResult.getLocation());
 
         if (landed != this.hasLanded()) {
             int cloudSize = this.getCloudSize();
