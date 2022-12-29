@@ -51,8 +51,6 @@ dependencies {
     modApi("gg.moonflower:pollen-forge:${rootProject.pollen_version}") { transitive = false }
 
     modRuntimeOnly "me.djtheredstoner:DevAuth-forge-latest:${rootProject.devauth_version}"
-	modRuntimeOnly "curse.maven:configured-457570:3559398"
-    modRuntimeOnly "curse.maven:catalogue-459701:3559402"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
