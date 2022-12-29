@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "group": "bombs",
   "pattern": [
     "  #",
     "GG ",
@@ -16,6 +17,5 @@
   "result": {
     "item": "tolerablecreepers:spore_bomb",
     "count": 2
-  },
-  "group": "bombs"
+  }
 }

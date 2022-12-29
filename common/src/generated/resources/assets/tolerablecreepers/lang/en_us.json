@@ -4,5 +4,7 @@
   "entity.tolerablecreepers.creepie": "Creepie",
   "entity.tolerablecreepers.spore_barrel": "Spore Barrel",
   "item.tolerablecreepers.creeper_spores": "Creeper Spores",
-  "item.tolerablecreepers.mischief_arrow": "Mischief Arrow"
+  "item.tolerablecreepers.fire_bomb": "Fire Bomb",
+  "item.tolerablecreepers.mischief_arrow": "Mischief Arrow",
+  "item.tolerablecreepers.spore_bomb": "Spore Bomb"
 }

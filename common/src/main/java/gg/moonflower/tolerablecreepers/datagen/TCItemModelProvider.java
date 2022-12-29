@@ -26,5 +26,7 @@ public class TCItemModelProvider extends PollinatedItemModelGenerator {
     public void run() {
         this.generateFlatItem(TCItems.CREEPER_SPORES.get(), ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(TCItems.MISCHIEF_ARROW.get(), ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(TCItems.FIRE_BOMB.get(), ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(TCItems.SPORE_BOMB.get(), ModelTemplates.FLAT_ITEM);
     }
 }

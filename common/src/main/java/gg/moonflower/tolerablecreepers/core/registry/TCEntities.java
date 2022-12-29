@@ -2,10 +2,7 @@ package gg.moonflower.tolerablecreepers.core.registry;
 
 import gg.moonflower.pollen.api.registry.PollinatedEntityRegistry;
 import gg.moonflower.pollen.api.registry.PollinatedRegistry;
-import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
-import gg.moonflower.tolerablecreepers.common.entity.Creepie;
-import gg.moonflower.tolerablecreepers.common.entity.MischiefArrow;
-import gg.moonflower.tolerablecreepers.common.entity.PrimedSporeBarrel;
+import gg.moonflower.tolerablecreepers.common.entity.*;
 import gg.moonflower.tolerablecreepers.common.entity.ai.sensing.CreepieAttackablesSensor;
 import gg.moonflower.tolerablecreepers.common.entity.ai.sensing.CreepieSpecificSensor;
 import gg.moonflower.tolerablecreepers.common.entity.ai.sensing.CreepieFriendSensor;
@@ -26,6 +23,8 @@ public class TCEntities {
     public static final Supplier<EntityType<Creepie>> CREEPIE = ENTITIES.register("creepie", () -> EntityType.Builder.<Creepie>of(Creepie::new, MobCategory.MONSTER).sized(0.625F, 0.875F).clientTrackingRange(8).build("creepie"));
     public static final Supplier<EntityType<PrimedSporeBarrel>> SPORE_BARREL = ENTITIES.register("spore_barrel", () -> EntityType.Builder.<PrimedSporeBarrel>of(PrimedSporeBarrel::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F).clientTrackingRange(10).updateInterval(10).build("spore_barrel"));
     public static final Supplier<EntityType<MischiefArrow>> MISCHIEF_ARROW = ENTITIES.register("mischief_arrow", () -> EntityType.Builder.<MischiefArrow>of(MischiefArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("mischief_arrow"));
+    public static final Supplier<EntityType<FireBomb>> FIRE_BOMB = ENTITIES.register("fire_bomb", () -> EntityType.Builder.<FireBomb>of(FireBomb::new, MobCategory.MISC).sized(0.1875F, 0.375F).clientTrackingRange(4).updateInterval(20).build("fire_bomb"));
+    public static final Supplier<EntityType<SporeBomb>> SPORE_BOMB = ENTITIES.register("spore_bomb", () -> EntityType.Builder.<SporeBomb>of(SporeBomb::new, MobCategory.MISC).sized(0.1875F, 0.375F).clientTrackingRange(4).updateInterval(20).build("spore_bomb"));
 
     public static final Supplier<MemoryModuleType<BlockPos>> HIDING_SPOT = ENTITIES.registerMemoryModuleType("hide_azalea", BlockPos.CODEC);
     public static final Supplier<MemoryModuleType<Boolean>> HAS_FRIENDS = ENTITIES.registerMemoryModuleType("has_friends");

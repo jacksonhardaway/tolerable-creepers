@@ -10,15 +10,14 @@ import gg.moonflower.pollen.api.registry.client.EntityRendererRegistry;
 import gg.moonflower.pollen.api.registry.client.ItemPredicateRegistry;
 import gg.moonflower.pollen.api.registry.client.ModelRegistry;
 import gg.moonflower.pollen.api.util.PollinatedModContainer;
-import gg.moonflower.tolerablecreepers.client.render.CreepieRenderer;
-import gg.moonflower.tolerablecreepers.client.render.MischiefArrowRenderer;
-import gg.moonflower.tolerablecreepers.client.render.SporeBarrelRenderer;
+import gg.moonflower.tolerablecreepers.client.render.*;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
 import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
@@ -67,6 +66,8 @@ public class TolerableCreepers {
         EntityRendererRegistry.register(TCEntities.CREEPIE, CreepieRenderer::new);
         EntityRendererRegistry.register(TCEntities.SPORE_BARREL, SporeBarrelRenderer::new);
         EntityRendererRegistry.register(TCEntities.MISCHIEF_ARROW, MischiefArrowRenderer::new);
+        EntityRendererRegistry.register(TCEntities.FIRE_BOMB, FireBombRenderer::new);
+        EntityRendererRegistry.register(TCEntities.SPORE_BOMB, SporeBombRenderer::new);
 
         ItemPredicateRegistry.register(
                 Items.CROSSBOW,
@@ -80,6 +81,8 @@ public class TolerableCreepers {
     }
 
     private static void onClientPostInit(Platform.ModSetupContext ctx) {
+        ModelRegistry.registerSpecial(new ResourceLocation(MOD_ID, "entity/fire_bomb"));
+        ModelRegistry.registerSpecial(new ResourceLocation(MOD_ID, "entity/spore_bomb"));
     }
 
     private static void onCommonInit() {
