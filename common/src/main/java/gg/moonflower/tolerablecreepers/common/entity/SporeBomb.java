@@ -20,22 +20,12 @@ public class SporeBomb extends ThrowableBomb {
     }
 
     @Override
-    public void handleEntityEvent(byte b) {
-        if (b == 0) {
-            this.level.addParticle(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 1.0, 0.0, 0.0);
-        } else {
-            super.handleEntityEvent(b);
-        }
-    }
-
-    @Override
     protected void explode() {
         CreeperSpores spores = new CreeperSpores(this.level, this.getX(), this.getY() + 0.01, this.getZ(), 1 + this.random.nextInt(2), false);
         if (!(this.getOwner() instanceof LivingEntity livingEntity) || !livingEntity.hasEffect(MobEffects.INVISIBILITY)) {
             spores.setOwner(this.getOwner());
         }
         this.level.addFreshEntity(spores);
-        this.level.broadcastEntityEvent(this, (byte) (this.isInWater() ? 1 : 0));
         this.discard();
     }
 
