@@ -3,11 +3,13 @@ package gg.moonflower.tolerablecreepers.common.entity;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCParticles;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class SporeBomb extends ThrowableBomb {
 
@@ -26,6 +28,16 @@ public class SporeBomb extends ThrowableBomb {
             spores.setOwner(this.getOwner());
         }
         this.level.addFreshEntity(spores);
+        this.level.gameEvent(this, GameEvent.EXPLODE, this);
+        this.level.playSound(null,
+                this.getX(),
+                this.getY(),
+                this.getZ(),
+                SoundEvents.GENERIC_EXPLODE,
+                SoundSource.BLOCKS,
+                4.0F,
+                (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F
+        );
         this.discard();
     }
 

@@ -37,7 +37,7 @@ public class FireBomb extends ThrowableBomb {
             double xVelocity = Math.sin(theta) * cos * (this.random.nextFloat() * 0.3 + 0.7);
             double yVelocity = cos * Math.cos(theta) * (this.random.nextFloat() * 0.3 + 0.7);
             double zVelocity = Math.sin(alpha) * (this.random.nextFloat() * 0.3 + 0.7);
-            this.level.addParticle(particle, false, this.getX(), this.getY(), this.getZ(), xVelocity * 0.6, yVelocity * 0.6, zVelocity * 0.6);
+            this.level.addParticle(particle, this.getX(), this.getY(), this.getZ(), xVelocity * 0.6, yVelocity * 0.6, zVelocity * 0.6);
         }
     }
 

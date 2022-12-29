@@ -3,13 +3,11 @@ package gg.moonflower.tolerablecreepers.common.entity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,13 +38,14 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
             return;
         }
 
-        Vec3 motion = this.getDeltaMovement();
-        if (motion.lengthSqr() < 0.1) {
-            this.setDeltaMovement(Vec3.ZERO);
-            return;
-        }
-
         if (hitResult instanceof BlockHitResult blockHitResult) {
+            Vec3 motion = this.getDeltaMovement();
+            if (motion.lengthSqr() < 0.1) {
+                this.setDeltaMovement(Vec3.ZERO);
+                this.onGround = true;
+                return;
+            }
+
             Direction direction = blockHitResult.getDirection();
             switch (direction.getAxis()) {
                 case X -> this.setDeltaMovement(
@@ -89,7 +88,10 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
             if (distance > 0.01) {
                 this.roll += Math.sqrt(distance) * 45;
             }
-            this.level.addParticle(this.getParticle(), this.getX(), this.getY() + this.getBbHeight(), this.getZ(), 0, 0, 0);
+
+            if (!this.onGround) {
+                this.level.addParticle(this.getParticle(), this.getX(), this.getY() + this.getBbHeight(), this.getZ(), 0, 0, 0);
+            }
         } else if (this.tickCount >= MAX_LIFE) {
             this.explode();
         }
