@@ -29,7 +29,7 @@ public abstract class IronGolemMixin extends AbstractGolem implements NeutralMob
             this.setTarget((LivingEntity) entity);
     }
 
-    @Inject(method = "canAttackType", at = @At(value = "RETURN", ordinal = 1, shift = At.Shift.BEFORE))
+    @Inject(method = "canAttackType", at = @At(value = "RETURN", ordinal = 1, shift = At.Shift.BEFORE), cancellable = true)
     private void canAttackType(EntityType<?> entityType, CallbackInfoReturnable<Boolean> cir) {
         if (!(this.isPlayerCreated() && entityType == EntityType.PLAYER))
             cir.setReturnValue(super.canAttackType(entityType));
