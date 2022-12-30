@@ -120,10 +120,11 @@ public class TolerableCreepers {
             //creepie avoid goal
             return true;
         }));
+
+        EntityAttributeRegistry.register(TCEntities.CREEPIE, Creepie::createAttributes);
     }
 
     private static void onCommonPostInit(Platform.ModSetupContext ctx) {
-        EntityAttributeRegistry.register(TCEntities.CREEPIE, Creepie::createAttributes);
         ctx.enqueueWork(() -> DispenserBlock.registerBehavior(TCItems.CREEPER_SPORES.get(), (blockSource, stack) -> {
             Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
 
