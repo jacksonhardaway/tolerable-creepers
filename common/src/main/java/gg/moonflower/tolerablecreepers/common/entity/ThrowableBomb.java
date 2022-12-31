@@ -1,13 +1,16 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
+import gg.moonflower.pollen.api.util.NbtConstants;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -15,8 +18,9 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
 
     private static final float VERTICAL_RESTITUTION = 0.3F;
     private static final float HORIZONTAL_RESTITUTION = 0.4F;
-    private static final int MAX_LIFE = 60;
+    private static final int MAX_LIFE = 200;
 
+    private int explodeTimer = -1;
     private float oRoll;
     private float roll;
 
@@ -61,9 +65,19 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
                         -motion.z() * HORIZONTAL_RESTITUTION
                 );
             }
+            if (this.explodeTimer == -1) {
+                this.explodeTimer = 30;
+            }
         }
 
         super.onHit(hitResult);
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        if (!this.level.isClientSide()) {
+            this.explode();
+        }
     }
 
     @Override
@@ -75,6 +89,20 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
         if (distanceSq > 0.01) {
             this.setYRot(lerpRotation(this.yRotO, (float) (Mth.atan2(deltaMovement.x, deltaMovement.z) * 180.0F / (float) Math.PI)));
         }
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        if (this.explodeTimer > -1) {
+            nbt.putByte("ExplodeTime", (byte) this.explodeTimer);
+        }
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        this.explodeTimer = nbt.contains("ExplodeTime", NbtConstants.INT) ? nbt.getInt("ExplodeTime") : -1;
     }
 
     @Override
@@ -92,8 +120,15 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
             if (!this.onGround) {
                 this.level.addParticle(this.getParticle(), this.getX(), this.getY() + this.getBbHeight(), this.getZ(), 0, 0, 0);
             }
-        } else if (this.tickCount >= MAX_LIFE) {
-            this.explode();
+        } else {
+            if (this.explodeTimer > -1) {
+                this.explodeTimer--;
+                if (this.explodeTimer <= 0) {
+                    this.explode();
+                }
+            } else if (this.tickCount >= MAX_LIFE) {
+                this.explode();
+            }
         }
     }
 

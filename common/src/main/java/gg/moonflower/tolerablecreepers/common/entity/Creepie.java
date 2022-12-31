@@ -380,7 +380,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         }
     }
 
-    private void setType(CreepieType type) {
+    public void setType(CreepieType type) {
         this.entityData.set(DATA_TYPE_ID, type.ordinal());
     }
 

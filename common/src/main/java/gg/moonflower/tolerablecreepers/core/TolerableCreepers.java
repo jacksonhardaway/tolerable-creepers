@@ -1,5 +1,6 @@
 package gg.moonflower.tolerablecreepers.core;
 
+import gg.moonflower.pollen.api.datagen.provider.loot_table.PollinatedLootTableProvider;
 import gg.moonflower.pollen.api.datagen.provider.model.PollinatedModelProvider;
 import gg.moonflower.pollen.api.event.events.entity.EntityEvents;
 import gg.moonflower.pollen.api.event.events.registry.client.ParticleFactoryRegistryEvent;
@@ -17,11 +18,11 @@ import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
 import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -40,9 +41,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Random;
 
 public class TolerableCreepers {
@@ -90,6 +96,7 @@ public class TolerableCreepers {
         TCBlocks.BLOCKS.register(TolerableCreepers.PLATFORM);
         TCEntities.ENTITIES.register(TolerableCreepers.PLATFORM);
         TCParticles.PARTICLES.register(TolerableCreepers.PLATFORM);
+
         ExplosionEvents.DETONATE.register((level, explosion, entityList) -> {
             entityList.removeIf(entity -> !(entity instanceof LivingEntity || entity.getType().is(TCTags.EXPLOSION_PRONE)) || entity.getType().is(TCTags.EXPLOSION_IMMUNE));
             if (explosion.getSourceMob() instanceof Creeper creeper) {
@@ -150,6 +157,9 @@ public class TolerableCreepers {
         generator.addProvider(blockTagProvider);
         generator.addProvider(new TCItemTagProvider(generator, container, blockTagProvider));
         generator.addProvider(new TCEntityTypeTagProvider(generator, container));
+        generator.addProvider(new PollinatedLootTableProvider(generator)
+                .add(LootContextParamSets.BLOCK, new TCBlockLootProvider(container))
+                .add(LootContextParamSets.ENTITY, new TCEntityLootProvider()));
         PollinatedModelProvider modelProvider = new PollinatedModelProvider(generator, container);
         modelProvider.addGenerator(TCBlockModelProvider::new);
         modelProvider.addGenerator(TCItemModelProvider::new);

@@ -6,6 +6,7 @@ import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 
 public class TCEntityTypeTagProvider extends PollinatedEntityTypeTagsProvider {
@@ -20,6 +21,7 @@ public class TCEntityTypeTagProvider extends PollinatedEntityTypeTagsProvider {
         this.tag(TCTags.EXPLOSION_IMMUNE).add(EntityType.ARMOR_STAND, EntityType.ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, EntityType.PAINTING, EntityType.MINECART, EntityType.BOAT).addOptional(new ResourceLocation("mannequins", "mannequin"));
         this.tag(TCTags.EXPLOSION_PRONE);
         this.tag(TCTags.CREEPIE_AVOID).add(EntityType.OCELOT, EntityType.CAT);
-        this.tag(TCTags.CREEPIE_FRIENDS).add(TCEntities.CREEPIE.get()).add(EntityType.CREEPER);
+        this.tag(TCTags.CREEPIE_FRIENDS).add(TCEntities.CREEPIE.get(), EntityType.CREEPER);
+        this.tag(EntityTypeTags.ARROWS).add(TCEntities.MISCHIEF_ARROW.get());
     }
 }

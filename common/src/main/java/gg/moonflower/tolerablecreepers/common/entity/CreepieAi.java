@@ -6,15 +6,13 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
 import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationState;
-import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieAttack;
-import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieDance;
-import gg.moonflower.tolerablecreepers.common.entity.ai.CreepieHide;
-import gg.moonflower.tolerablecreepers.common.entity.ai.CreepiePlayTag;
+import gg.moonflower.tolerablecreepers.common.entity.ai.*;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -22,7 +20,9 @@ import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.Optional;
@@ -53,6 +53,7 @@ public class CreepieAi {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new LookAtTargetSink(45, 90),
                 new RunIf<>(Creepie::canMove, new MoveToTargetSink(), true),
+                new RunIf<>(creepie -> creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY, new CreepieFollowOwner(16, 1.0F), false),
                 new StopBeingAngryIfTargetDead<>()
         ));
     }
@@ -122,11 +123,49 @@ public class CreepieAi {
         return SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, 1.0F, 8, false);
     }
 
+    private static boolean isFriendlyCreepieTarget(Entity entity) {
+        return entity instanceof Creepie creepie && creepie.getCreepieType() != Creepie.CreepieType.FRIENDLY;
+    }
+
+    private static void updateTarget(LivingEntity owner, Creepie creepie) {
+        LivingEntity lastHurt = owner.getLastHurtMob();
+        LivingEntity lastHurtBy = owner.getLastHurtByMob();
+        if (lastHurt == null && lastHurtBy == null) {
+            Level level = creepie.getLevel();
+            Creepie closest = level.getNearestEntity(level.getEntitiesOfClass(Creepie.class, owner.getBoundingBox().inflate(6, 2, 6), CreepieAi::isFriendlyCreepieTarget), TargetingConditions.DEFAULT, owner, owner.getX(), owner.getY(), owner.getZ());
+            if (closest != null) {
+                creepie.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, closest);
+            }
+
+            return;
+        }
+
+        if (lastHurt == null) {
+            creepie.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, Optional.of(lastHurtBy));
+            return;
+        }
+
+        if (lastHurtBy == null) {
+            creepie.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, Optional.of(lastHurt));
+            return;
+        }
+
+        long lastHurtTime = owner.getLastHurtMobTimestamp();
+        long lastHurtByTime = owner.getLastHurtByMobTimestamp();
+        creepie.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, Optional.of(lastHurtByTime >= lastHurtTime ? lastHurtBy : lastHurt));
+    }
+
     protected static void updateActivity(Creepie creepie) {
         Brain<Creepie> brain = creepie.getBrain();
 
-        if (creepie.getCreepieType() != Creepie.CreepieType.ENRAGED) {
+        if (creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY) {
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.CELEBRATE, Activity.PLAY, Activity.IDLE));
+            if (creepie.getOwner() instanceof LivingEntity livingOwner) {
+                updateTarget(livingOwner, creepie);
+                if (brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+                    brain.eraseMemory(MemoryModuleType.CELEBRATE_LOCATION);
+                }
+            }
         } else {
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.AVOID, Activity.FIGHT, Activity.IDLE));
         }

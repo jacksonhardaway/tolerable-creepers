@@ -2,14 +2,17 @@ package gg.moonflower.tolerablecreepers.common.entity.ai.sensing;
 
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.NearestVisibleLivingEntitySensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class CreepieAttackablesSensor extends NearestVisibleLivingEntitySensor {
 
@@ -25,17 +28,19 @@ public class CreepieAttackablesSensor extends NearestVisibleLivingEntitySensor {
     }
 
     private boolean isTarget(Creepie creepie, LivingEntity target) {
-        if (target.getType().is(TCTags.CREEPIE_AVOID))
+        if (target.getType().is(TCTags.CREEPIE_AVOID)) {
             return false;
-        if (creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY)
-            return target instanceof Enemy && ((target instanceof Creepie && !this.isFriendlyCreepie(target)) || !(target instanceof Creeper));
-        if (creepie.getCreepieType() == Creepie.CreepieType.NORMAL)
+        }
+        if (creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY && creepie.getOwner() != null) {
             return false;
-        return !(target instanceof Creepie targetCreepie) || targetCreepie.getCreepieType() != Creepie.CreepieType.ENRAGED;
-    }
-
-    private boolean isFriendlyCreepie(LivingEntity entity) {
-        return entity instanceof Creepie creepie && creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY;
+        }
+        if (target instanceof Creepie targetCreepie && targetCreepie.getCreepieType() == creepie.getCreepieType()) {
+            return false;
+        }
+        if (creepie.getCreepieType() == Creepie.CreepieType.ENRAGED) {
+            return !(target instanceof Creepie targetCreepie) || targetCreepie.getCreepieType() != Creepie.CreepieType.ENRAGED;
+        }
+        return target instanceof Player || target instanceof IronGolem || target instanceof Creepie;
     }
 
     @Override

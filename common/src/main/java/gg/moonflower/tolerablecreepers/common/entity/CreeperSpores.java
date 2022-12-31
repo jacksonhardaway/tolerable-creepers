@@ -13,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -31,6 +33,7 @@ public class CreeperSpores extends ThrowableProjectile {
     private static final EntityDataAccessor<Integer> CLOUD_SIZE = SynchedEntityData.defineId(CreeperSpores.class, EntityDataSerializers.INT);
 
     private Creepie spawnCreepie;
+    private boolean creeperOwner;
     private int cloudTime;
 
     public CreeperSpores(EntityType<? extends ThrowableProjectile> entityType, Level level) {
@@ -50,15 +53,25 @@ public class CreeperSpores extends ThrowableProjectile {
     }
 
     @Override
+    public void setOwner(@Nullable Entity entity) {
+        super.setOwner(entity);
+        this.creeperOwner = entity instanceof Creeper;
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
-        boolean landed = this.hasLanded();
-        if (hitResult.getType() != HitResult.Type.BLOCK || (!((BlockHitResult) hitResult).isInside() && ((BlockHitResult) hitResult).getDirection() == Direction.UP))
-            this.onGround = true;
-        this.setDeltaMovement(Vec3.ZERO);
-        this.setLanded();
-        this.setPos(hitResult.getLocation());
+        if (hitResult.getType() == HitResult.Type.MISS) {
+            return;
+        }
 
+        boolean landed = this.hasLanded();
+        if (hitResult.getType() != HitResult.Type.BLOCK || (!((BlockHitResult) hitResult).isInside() && ((BlockHitResult) hitResult).getDirection() == Direction.UP)) {
+            this.onGround = true;
+            this.setLanded();
+        }
+
+        this.setDeltaMovement(Vec3.ZERO);
         if (landed != this.hasLanded()) {
             int cloudSize = this.getCloudSize();
             if (this.level.isClientSide()) {
@@ -72,7 +85,7 @@ public class CreeperSpores extends ThrowableProjectile {
                 this.cloudTime = 20 * cloudSize + 200; // 10 seconds above cloud size
             }
 
-            this.setDeltaMovement(Vec3.ZERO);
+            this.setPos(hitResult.getLocation());
         }
     }
 
@@ -103,12 +116,15 @@ public class CreeperSpores extends ThrowableProjectile {
                         float phi = (float) (this.random.nextFloat() * 2 * Math.PI);
 
                         double xPos = this.getX() + Mth.sin(phi) * Mth.cos(theta) * cloudSize * this.random.nextFloat();
-                        double yPos = this.getY();
                         double zPos = this.getZ() + Mth.cos(phi) * cloudSize * this.random.nextFloat();
+                        double yPos = this.getY();
 
                         if (this.level.clip(new ClipContext(this.position(), new Vec3(xPos, yPos, zPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS) {
                             Vec3 creepieSpawnPos = new Vec3(xPos, yPos, zPos);
                             this.spawnCreepie = new Creepie(this.level, this.getOwner(), this.isPowered());
+                            if (this.creeperOwner) {
+                                this.spawnCreepie.setType(Creepie.CreepieType.NORMAL);
+                            }
                             this.spawnCreepie.setPos(creepieSpawnPos);
 
                             BlockState state = this.level.getBlockState(this.spawnCreepie.getOnPos());

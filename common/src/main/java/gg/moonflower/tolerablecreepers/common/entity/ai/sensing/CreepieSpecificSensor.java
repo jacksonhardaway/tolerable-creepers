@@ -45,7 +45,7 @@ public class CreepieSpecificSensor extends Sensor<Creepie> {
         brain.setMemory(MemoryModuleType.CELEBRATE_LOCATION, findNearestCelebration(level, creepie));
 
         NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
-        brain.setMemory(MemoryModuleType.AVOID_TARGET, nearestVisibleLivingEntities.findClosest(e -> EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(e) && (!e.isSteppingCarefully() || creepie.distanceToSqr(e) <= 64.0) && (creepie.getCreepieType() == Creepie.CreepieType.NORMAL || e.getType().is(TCTags.CREEPIE_AVOID))));
+        brain.setMemory(MemoryModuleType.AVOID_TARGET, nearestVisibleLivingEntities.findClosest(e -> EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(e) && e.getType().is(TCTags.CREEPIE_AVOID) && (!e.isSteppingCarefully() || creepie.distanceToSqr(e) <= 64.0)));
     }
 
     private static Optional<BlockPos> findNearest(LivingEntity entity, Predicate<BlockPos> predicate) {
