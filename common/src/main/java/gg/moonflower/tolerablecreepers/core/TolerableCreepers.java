@@ -14,15 +14,20 @@ import gg.moonflower.pollen.api.util.PollinatedModContainer;
 import gg.moonflower.tolerablecreepers.client.render.*;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
+import gg.moonflower.tolerablecreepers.common.entity.FireBomb;
+import gg.moonflower.tolerablecreepers.common.entity.SporeBomb;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
 import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -35,20 +40,18 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Random;
 
 public class TolerableCreepers {
@@ -132,20 +135,57 @@ public class TolerableCreepers {
     }
 
     private static void onCommonPostInit(Platform.ModSetupContext ctx) {
-        ctx.enqueueWork(() -> DispenserBlock.registerBehavior(TCItems.CREEPER_SPORES.get(), (blockSource, stack) -> {
-            Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+        ctx.enqueueWork(() -> {
+            DispenserBlock.registerBehavior(TCItems.CREEPER_SPORES.get(), new DefaultDispenseItemBehavior() {
+                @Override
+                protected ItemStack execute(BlockSource level, ItemStack stack) {
+                    Direction direction = level.getBlockState().getValue(DispenserBlock.FACING);
 
-            try {
-                TCEntities.CREEPIE.get().spawn(blockSource.getLevel(), stack, null, blockSource.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
-            } catch (Exception var6) {
-                LOGGER.error("Error while dispensing spawn egg from dispenser at {}", blockSource.getPos(), var6);
-                return ItemStack.EMPTY;
-            }
+                    try {
+                        TCEntities.CREEPIE.get().spawn(level.getLevel(), stack, null, level.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
+                    } catch (Exception var6) {
+                        LOGGER.error("Error while dispensing spawn egg from dispenser at {}", level.getPos(), var6);
+                        return ItemStack.EMPTY;
+                    }
 
-            stack.shrink(1);
-            blockSource.getLevel().gameEvent(GameEvent.ENTITY_PLACE, blockSource.getPos());
-            return stack;
-        }));
+                    stack.shrink(1);
+                    level.getLevel().gameEvent(GameEvent.ENTITY_PLACE, level.getPos());
+                    return stack;
+                }
+            });
+            DispenserBlock.registerBehavior(TCItems.FIRE_BOMB.get(), new AbstractProjectileDispenseBehavior() {
+                @Override
+                protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                    return new FireBomb(level, position.x(), position.y(), position.z());
+                }
+
+                @Override
+                protected float getUncertainty() {
+                    return super.getUncertainty() * 0.5F;
+                }
+
+                @Override
+                protected float getPower() {
+                    return super.getPower() * 1.25F;
+                }
+            });
+            DispenserBlock.registerBehavior(TCItems.SPORE_BOMB.get(), new AbstractProjectileDispenseBehavior() {
+                @Override
+                protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                    return new SporeBomb(level, position.x(), position.y(), position.z());
+                }
+
+                @Override
+                protected float getUncertainty() {
+                    return super.getUncertainty() * 0.5F;
+                }
+
+                @Override
+                protected float getPower() {
+                    return super.getPower() * 1.25F;
+                }
+            });
+        });
     }
 
     private static void onDataInit(Platform.DataSetupContext ctx) {

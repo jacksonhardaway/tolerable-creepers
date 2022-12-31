@@ -24,11 +24,15 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
     private float oRoll;
     private float roll;
 
-    public ThrowableBomb(EntityType<? extends ThrowableBomb> entityType, Level level) {
+    protected ThrowableBomb(EntityType<? extends ThrowableProjectile> entityType, Level level) {
         super(entityType, level);
     }
 
-    public ThrowableBomb(EntityType<? extends ThrowableBomb> entityType, LivingEntity livingEntity, Level level) {
+    protected ThrowableBomb(EntityType<? extends ThrowableProjectile> entityType, double d, double e, double f, Level level) {
+        super(entityType, d, e, f, level);
+    }
+
+    protected ThrowableBomb(EntityType<? extends ThrowableProjectile> entityType, LivingEntity livingEntity, Level level) {
         super(entityType, livingEntity, level);
     }
 

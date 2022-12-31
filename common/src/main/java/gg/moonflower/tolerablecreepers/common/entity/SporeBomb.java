@@ -20,6 +20,10 @@ public class SporeBomb extends ThrowableBomb {
         super(TCEntities.SPORE_BOMB.get(), livingEntity, level);
     }
 
+    public SporeBomb(Level level, double x, double y, double z) {
+        super(TCEntities.SPORE_BOMB.get(), x, y, z, level);
+    }
+
     @Override
     protected void explode() {
         double height = this.level.getHeight(Heightmap.Types.MOTION_BLOCKING, this.blockPosition().getX(), this.blockPosition().getZ());

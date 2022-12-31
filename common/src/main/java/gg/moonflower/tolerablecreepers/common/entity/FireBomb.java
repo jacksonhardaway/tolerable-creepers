@@ -10,14 +10,23 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 
 public class FireBomb extends ThrowableBomb {
 
     public FireBomb(EntityType<? extends ThrowableBomb> entityType, Level level) {
         super(entityType, level);
+    }
+
+    public FireBomb(LivingEntity livingEntity, Level level) {
+        super(TCEntities.FIRE_BOMB.get(), livingEntity, level);
+    }
+
+    public FireBomb(Level level, double x, double y, double z) {
+        super(TCEntities.FIRE_BOMB.get(), x, y, z, level);
     }
 
     @Override
@@ -71,13 +80,13 @@ public class FireBomb extends ThrowableBomb {
             if (state.is(BlockTags.CAMPFIRES) && state.hasProperty(CampfireBlock.LIT) && !state.getValue(CampfireBlock.LIT)) {
                 this.level.setBlock(pos, state.setValue(CampfireBlock.LIT, true), 3);
             }
+            if (state.getBlock() == Blocks.TNT) {
+                TntBlock.explode(this.level, pos);
+                this.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
+            }
         });
         this.level.broadcastEntityEvent(this, (byte) (this.isInWater() ? 1 : 0));
         this.discard();
-    }
-
-    public FireBomb(LivingEntity livingEntity, Level level) {
-        super(TCEntities.FIRE_BOMB.get(), livingEntity, level);
     }
 
     @Override
