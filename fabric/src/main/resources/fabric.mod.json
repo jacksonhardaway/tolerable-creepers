@@ -3,7 +3,7 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "This is an example starter template.",
+  "description": "Make creepers no longer grief unjustly, but make them more of an interesting enemy: they spawn creepies now!",
   "authors": [
     "Moonflower"
   ],

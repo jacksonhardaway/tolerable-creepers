@@ -10,7 +10,7 @@ displayName = "${name}"
 authors = "Moonflower"
 credits = "An author, another author, and the last author."
 description = '''
-This is an example starter template.
+Make creepers no longer grief unjustly, but make them more of an interesting enemy: they spawn creepies now!
 '''
 #updateJSONURL = ""
 #logoFile = ""
