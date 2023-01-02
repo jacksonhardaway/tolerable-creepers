@@ -13,6 +13,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.ClipContext;
@@ -34,6 +36,8 @@ public class CreeperSpores extends ThrowableProjectile {
 
     private Creepie spawnCreepie;
     private boolean creeperOwner;
+    @Nullable
+    private LivingEntity target;
     private int cloudTime;
 
     public CreeperSpores(EntityType<? extends ThrowableProjectile> entityType, Level level) {
@@ -52,10 +56,31 @@ public class CreeperSpores extends ThrowableProjectile {
         this.entityData.set(CLOUD_SIZE, cloudSize);
     }
 
+    private static LivingEntity updateTarget(Mob owner) {
+        LivingEntity lastHurt = owner.getLastHurtMob();
+        LivingEntity lastHurtBy = owner.getLastHurtByMob();
+        if (lastHurt == null && lastHurtBy == null) {
+            return null;
+        }
+
+        if (lastHurt == null) {
+            return lastHurtBy;
+        }
+
+        if (lastHurtBy == null) {
+            return lastHurt;
+        }
+
+        long lastHurtTime = owner.getLastHurtMobTimestamp();
+        long lastHurtByTime = owner.getLastHurtByMobTimestamp();
+        return lastHurtByTime >= lastHurtTime ? lastHurtBy : lastHurt;
+    }
+
     @Override
     public void setOwner(@Nullable Entity entity) {
         super.setOwner(entity);
         this.creeperOwner = entity instanceof Creeper;
+        this.target = entity instanceof Mob mob ? updateTarget(mob) : null;
     }
 
     @Override
@@ -122,6 +147,7 @@ public class CreeperSpores extends ThrowableProjectile {
                         if (this.level.clip(new ClipContext(this.position(), new Vec3(xPos, yPos, zPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS) {
                             Vec3 creepieSpawnPos = new Vec3(xPos, yPos, zPos);
                             this.spawnCreepie = new Creepie(this.level, this.getOwner(), this.isPowered());
+                            this.spawnCreepie.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, this.target);
                             if (this.creeperOwner) {
                                 this.spawnCreepie.setType(Creepie.CreepieType.NORMAL);
                             }
