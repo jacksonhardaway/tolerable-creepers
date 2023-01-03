@@ -9,6 +9,7 @@
   "mixins": [
     "AzaleaBlockMixin",
     "CreeperMixin",
+    "CreeperAccessor",
     "IronGolemMixin",
     "MobAccessor",
     "ZoglinMixin"
