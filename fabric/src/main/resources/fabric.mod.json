@@ -9,16 +9,16 @@
   ],
   "contributors": [
     "Ocelot",
-    "Farcr",
-    "Abigail"
+    "Farcr"
   ],
   "contact": {
-    "homepage": "https://moonflower.gg",
+    "homepage": "https://www.moonflower.gg",
     "issues": "https://github.com/MoonflowerTeam/${repo}/issues",
     "sources": "https://github.com/MoonflowerTeam/${repo}/"
   },
   "license": "GPLv3",
   "environment": "*",
+  "icon": "icon.png",
   "mixins": [
     "${id}-common.mixins.json",
     "${id}.mixins.json"
@@ -33,6 +33,6 @@
   },
   "depends": {
     "minecraft": "1.18.x",
-    "pollen": "1.x >=1.5"
+    "pollen": "1.x >=1.6"
   }
 }

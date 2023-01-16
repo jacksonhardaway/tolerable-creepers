@@ -8,12 +8,15 @@ modId = "${id}"
 version = "${version}"
 displayName = "${name}"
 authors = "Moonflower"
-credits = "An author, another author, and the last author."
+credits = "Ocelot, Farcr"
 description = '''
 Make creepers no longer grief unjustly, but make them more of an interesting enemy: they spawn creepies now!
 '''
 #updateJSONURL = ""
-#logoFile = ""
+logoFile = "logo.png"
+
+[modproperties.${id}]
+catalogueImageIcon="icon.png"
 
 [[dependencies.${id}]]
 modId = "forge"
@@ -32,6 +35,6 @@ side = "BOTH"
 [[dependencies.${id}]]
 modId = "pollen"
 mandatory = true
-versionRange = "[1.5.0,)"
+versionRange = "[1.6.0,)"
 ordering = "BEFORE"
 side = "BOTH"
