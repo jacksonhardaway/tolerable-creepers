@@ -24,7 +24,7 @@ public class TCRecipeProvider extends PollinatedRecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
-        nineBlockStorageRecipes(consumer, TCItems.CREEPER_SPORES.get(), TCBlocks.SPORE_BARREL.get(), getSimpleRecipeName(TCItems.CREEPER_SPORES.get()), null, getSimpleRecipeName(TCBlocks.SPORE_BARREL.get()), null);
+        nineBlockStorageRecipes(consumer, TCItems.CREEPER_SPORES.get(), TCBlocks.SPORE_BARREL.get(), getSimpleRecipeName(TCBlocks.SPORE_BARREL.get()), null, getSimpleRecipeName(TCItems.CREEPER_SPORES.get()), null);
         bomb(consumer, TCItems.FIRE_BOMB.get(), Items.GUNPOWDER);
         bomb(consumer, TCItems.SPORE_BOMB.get(), TCItems.CREEPER_SPORES.get());
         ShapelessRecipeBuilder.shapeless(TCItems.MISCHIEF_ARROW.get(), 2).requires(Items.ARROW, 2).requires(TCItems.CREEPER_SPORES.get()).unlockedBy(getHasName(TCItems.CREEPER_SPORES.get()), has(TCItems.CREEPER_SPORES.get())).save(consumer, getSimpleRecipeName(TCItems.MISCHIEF_ARROW.get()));
