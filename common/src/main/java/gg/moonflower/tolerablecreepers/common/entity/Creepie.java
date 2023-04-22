@@ -480,6 +480,11 @@ public class Creepie extends Creeper implements AnimatedEntity {
         return bl;
     }
 
+    @Override
+    protected boolean shouldDropExperience() {
+        return false;
+    }
+
     protected void playSound(SoundEvent soundEvent) {
         this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
