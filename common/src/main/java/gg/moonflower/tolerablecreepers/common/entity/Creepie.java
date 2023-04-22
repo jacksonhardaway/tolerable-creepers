@@ -128,6 +128,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.animationState = AnimationState.EMPTY;
         this.transitionAnimationState = AnimationState.EMPTY;
         this.age = -24000;
+        this.getNavigation().setCanFloat(true);
         ((CreeperAccessor) this).setExplosionRadius(1);
     }
 

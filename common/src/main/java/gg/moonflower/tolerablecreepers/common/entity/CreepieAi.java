@@ -51,6 +51,7 @@ public class CreepieAi {
 
     private static void initCoreActivity(Brain<Creepie> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
+                new Swim(0.8F),
                 new LookAtTargetSink(45, 90),
                 new RunIf<>(Creepie::canMove, new MoveToTargetSink(), true),
                 new RunIf<>(creepie -> creepie.getCreepieType() == Creepie.CreepieType.FRIENDLY, new CreepieFollowOwner(16, 1.0F), false),
