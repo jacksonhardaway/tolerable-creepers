@@ -16,11 +16,14 @@ import gg.moonflower.tolerablecreepers.client.render.*;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.common.entity.FireBomb;
+import gg.moonflower.tolerablecreepers.common.entity.MischiefArrow;
+import gg.moonflower.tolerablecreepers.common.entity.PrimedSporeBarrel;
 import gg.moonflower.tolerablecreepers.common.entity.SporeBomb;
 import gg.moonflower.tolerablecreepers.core.mixin.MobAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.*;
 import gg.moonflower.tolerablecreepers.datagen.*;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
@@ -29,6 +32,9 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -39,14 +45,19 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -184,6 +195,27 @@ public class TolerableCreepers {
                 @Override
                 protected float getPower() {
                     return super.getPower() * 1.25F;
+                }
+            });
+            DispenserBlock.registerBehavior(TCItems.MISCHIEF_ARROW.get(), new AbstractProjectileDispenseBehavior() {
+                @Override
+                protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                    MischiefArrow arrow = new MischiefArrow(level, position.x(), position.y(), position.z());
+                    arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+                    return arrow;
+                }
+            });
+            DispenserBlock.registerBehavior(TCBlocks.SPORE_BARREL.get(), new DefaultDispenseItemBehavior() {
+                @Override
+                protected ItemStack execute(BlockSource arg, ItemStack arg2) {
+                    Level level = arg.getLevel();
+                    BlockPos blockpos = arg.getPos().relative(arg.getBlockState().getValue(DispenserBlock.FACING));
+                    PrimedSporeBarrel sporeBarrel = new PrimedSporeBarrel(level, (double)blockpos.getX() + 0.5, blockpos.getY(), (double)blockpos.getZ() + 0.5, null);
+                    level.addFreshEntity(sporeBarrel);
+                    level.playSound(null, sporeBarrel.getX(), sporeBarrel.getY(), sporeBarrel.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    level.gameEvent(null, GameEvent.ENTITY_PLACE, blockpos);
+                    arg2.shrink(1);
+                    return arg2;
                 }
             });
         });
