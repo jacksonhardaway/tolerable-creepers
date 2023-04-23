@@ -10,6 +10,7 @@ import gg.moonflower.pollen.api.registry.EntityAttributeRegistry;
 import gg.moonflower.pollen.api.registry.client.EntityRendererRegistry;
 import gg.moonflower.pollen.api.registry.client.ItemPredicateRegistry;
 import gg.moonflower.pollen.api.registry.client.ModelRegistry;
+import gg.moonflower.pollen.api.registry.content.CompostablesRegistry;
 import gg.moonflower.pollen.api.util.PollinatedModContainer;
 import gg.moonflower.tolerablecreepers.client.render.*;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
@@ -186,6 +187,7 @@ public class TolerableCreepers {
                 }
             });
         });
+        CompostablesRegistry.register(TCItems.CREEPER_SPORES.get(), 0.65F);
     }
 
     private static void onDataInit(Platform.DataSetupContext ctx) {
