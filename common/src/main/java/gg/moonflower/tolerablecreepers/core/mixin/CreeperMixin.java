@@ -1,5 +1,6 @@
 package gg.moonflower.tolerablecreepers.core.mixin;
 
+import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import gg.moonflower.tolerablecreepers.core.extension.CreeperExtension;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,6 +14,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(Creeper.class)
 public abstract class CreeperMixin extends Monster implements CreeperExtension {
@@ -34,6 +37,14 @@ public abstract class CreeperMixin extends Monster implements CreeperExtension {
     @Override
     public void tolerablecreepers$setPowered(boolean powered) {
         this.entityData.set(DATA_IS_POWERED, powered);
+    }
+
+    @ModifyArg(method = "spawnLingeringCloud", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/AreaEffectCloud;setRadius(F)V"))
+    private float tolerablecreepers$reduceCloudRadius(float f) {
+        if (((Creeper) (Object) this) instanceof Creepie) {
+            return 0.75F;
+        }
+        return f;
     }
 
     @Override
