@@ -1,27 +1,23 @@
-dependencies {
-    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-
-    modApi("gg.moonflower:pollen:${rootProject.pollen_version}") { transitive = false }
-    implementation "com.github.Ocelot5836:molang-compiler:${rootProject.molang_compiler_version}"
-}
-
 architectury {
-    common("forge", "fabric")
+    common(rootProject.enabled_platforms.split(","))
 }
 
 loom {
-//    accessWidenerPath.set(file("src/main/resources/${project.mod_id}.accesswidener"))
+//    splitEnvironmentSourceSets()
 }
 
-sourceSets.main.resources { srcDir file("src/generated/resources") }
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modApi "gg.moonflower:pollen-common:${rootProject.pollen_version}"
 
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            artifactId = project.archivesBaseName
-            from components.java
-        }
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${rootProject.mixinextras_version}"))
+}
+
+processResources {
+    inputs.property "mod_id", project.mod_id
+
+    filesMatching(["architectury.common.json"]) {
+        expand "mod_id": project.mod_id
     }
 }

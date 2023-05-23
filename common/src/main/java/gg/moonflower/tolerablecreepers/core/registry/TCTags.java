@@ -1,6 +1,6 @@
 package gg.moonflower.tolerablecreepers.core.registry;
 
-import gg.moonflower.pollen.api.registry.resource.TagRegistry;
+import gg.moonflower.pollen.api.registry.resource.v1.TagRegistry;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;

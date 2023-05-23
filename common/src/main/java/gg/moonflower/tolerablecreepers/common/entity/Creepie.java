@@ -2,10 +2,8 @@ package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import gg.moonflower.pollen.api.util.NbtConstants;
-import gg.moonflower.pollen.pinwheel.api.common.animation.AnimatedEntity;
-import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationEffectHandler;
-import gg.moonflower.pollen.pinwheel.api.common.animation.AnimationState;
+import gg.moonflower.pollen.api.animation.v1.entity.AnimatedEntity;
+import gg.moonflower.pollen.api.animation.v1.state.AnimationState;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import gg.moonflower.tolerablecreepers.core.extension.CreeperExtension;
 import gg.moonflower.tolerablecreepers.core.mixin.CreeperAccessor;
@@ -14,6 +12,7 @@ import gg.moonflower.tolerablecreepers.core.registry.TCItems;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -24,7 +23,12 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -56,8 +60,6 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public static final AnimationState SAD = new AnimationState(40, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_simple_walk"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_sad"));
     public static final AnimationState HIDE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hide"));
     public static final AnimationState DANCE = new AnimationState(Integer.MAX_VALUE, new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_setup"), new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_dance"));
-    private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE, IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
-
     /**
      * The maximum distance a creeper can be from a creepie before it becomes sad.
      */
@@ -70,7 +72,6 @@ public class Creepie extends Creeper implements AnimatedEntity {
      * The distance to check for jukeboxes and spore blossoms.
      */
     public static final float PARTY_DISTANCE = 8.0F;
-
     protected static final ImmutableList<SensorType<? extends Sensor<? super Creepie>>> SENSOR_TYPES = ImmutableList.of(
             SensorType.NEAREST_LIVING_ENTITIES,
             SensorType.NEAREST_PLAYERS,
@@ -101,7 +102,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             TCEntities.HIDING_SPOT.get(),
             TCEntities.HAS_FRIENDS.get()
     );
-
+    private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE, IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
     private final AnimationEffectHandler effectHandler;
@@ -139,6 +140,10 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.updateState();
     }
 
+    public static AttributeSupplier.Builder createAttributes() {
+        return Creeper.createAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.345);
+    }
+
     @Override
     protected void registerGoals() {
 //        this.goalSelector.addGoal(1, new FloatGoal(this));
@@ -151,10 +156,6 @@ public class Creepie extends Creeper implements AnimatedEntity {
 //        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 //        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
 //        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
-    }
-
-    public static AttributeSupplier.Builder createAttributes() {
-        return Creeper.createAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.345);
     }
 
     private void updateState() {
@@ -179,7 +180,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
             if (!player.isCreative())
                 stack.shrink(1);
             this.ageUp((int) ((float) (-this.getAge() / 20) * 0.1F), true);
-            this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+            this.gameEvent(GameEvent.ENTITY_INTERACT);
             return InteractionResult.sidedSuccess(this.level.isClientSide());
         }
 
@@ -311,11 +312,6 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     @Override
-    public AnimationState getTransitionAnimationState() {
-        return transitionAnimationState;
-    }
-
-    @Override
     public void setAnimationState(AnimationState state) {
         if (this.animationState == SAD) // Ignore new animations if currently sad
             return;
@@ -323,6 +319,11 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.animationState = state;
         this.setAnimationTick(0);
         this.setAnimationTransitionLength(0);
+    }
+
+    @Override
+    public AnimationState getTransitionAnimationState() {
+        return transitionAnimationState;
     }
 
     @Override
@@ -361,15 +362,9 @@ public class Creepie extends Creeper implements AnimatedEntity {
         super.readAdditionalSaveData(nbt);
         this.ownerUUID = nbt.hasUUID("Owner") ? nbt.getUUID("Owner") : null;
         this.setType(CreepieType.byName(nbt.getString("Type")));
-        this.setAge(nbt.contains("Age", NbtConstants.ANY_NUMERIC) ? nbt.getInt("Age") : -24000);
+        this.setAge(nbt.contains("Age", Tag.TAG_ANY_NUMERIC) ? nbt.getInt("Age") : -24000);
         this.forcedAge = nbt.getInt("ForcedAge");
         this.sadTimer = nbt.getInt("SadTime");
-    }
-
-    public void setOwner(@Nullable Entity entity) {
-        this.ownerUUID = entity != null ? entity.getUUID() : null;
-        this.cachedOwner = entity;
-        this.updateState();
     }
 
     @Nullable
@@ -381,6 +376,12 @@ public class Creepie extends Creeper implements AnimatedEntity {
         } else {
             return null;
         }
+    }
+
+    public void setOwner(@Nullable Entity entity) {
+        this.ownerUUID = entity != null ? entity.getUUID() : null;
+        this.cachedOwner = entity;
+        this.updateState();
     }
 
     public void setType(CreepieType type) {
@@ -482,24 +483,24 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     @Override
-    protected boolean shouldDropExperience() {
+    public boolean shouldDropExperience() {
         return false;
     }
 
-    protected void playSound(SoundEvent soundEvent) {
+    public void playSound(SoundEvent soundEvent) {
         this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
 
-    public void setSad(boolean sad) {
-        this.sadTimer = sad ? MAXIMUM_SAD_TIME : 0;
-    }
-
     public boolean isDancing() {
-        return this.getAnimationState() == DANCE;
+         return this.getAnimationState() == DANCE;
     }
 
     public boolean isSad() {
         return this.sadTimer > 0 || this.isAnimationPlaying(SAD);
+    }
+
+    public void setSad(boolean sad) {
+        this.sadTimer = sad ? MAXIMUM_SAD_TIME : 0;
     }
 
     public boolean canMove() {
@@ -519,15 +520,15 @@ public class Creepie extends Creeper implements AnimatedEntity {
             this.texture = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_" + this.name().toLowerCase(Locale.ROOT));
         }
 
-        public ResourceLocation getTexture() {
-            return texture;
-        }
-
         public static CreepieType byName(String name) {
             for (CreepieType type : values())
                 if (type.name().toLowerCase(Locale.ROOT).equals(name))
                     return type;
             return NORMAL;
+        }
+
+        public ResourceLocation getTexture() {
+            return texture;
         }
     }
 }

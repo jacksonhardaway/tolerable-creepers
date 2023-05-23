@@ -1,9 +1,9 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
-import gg.moonflower.pollen.api.util.NbtConstants;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -106,7 +106,7 @@ public abstract class ThrowableBomb extends ThrowableProjectile {
     @Override
     protected void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        this.explodeTimer = nbt.contains("ExplodeTime", NbtConstants.INT) ? nbt.getInt("ExplodeTime") : -1;
+        this.explodeTimer = nbt.contains("ExplodeTime", Tag.TAG_INT) ? nbt.getInt("ExplodeTime") : -1;
     }
 
     @Override

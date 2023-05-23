@@ -1,10 +1,7 @@
 package gg.moonflower.tolerablecreepers.client.render;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import gg.moonflower.pollen.pinwheel.api.client.geometry.GeometryModel;
-import gg.moonflower.pollen.pinwheel.api.client.geometry.GeometryModelWrapper;
-import gg.moonflower.pollen.pinwheel.api.client.texture.GeometryAtlasTexture;
-import gg.moonflower.pollen.pinwheel.api.common.texture.GeometryModelTexture;
+import gg.moonflower.pollen.api.render.geometry.v1.GeometryAtlasTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.Nullable;

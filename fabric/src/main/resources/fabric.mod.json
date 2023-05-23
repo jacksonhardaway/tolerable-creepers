@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "id": "${id}",
-  "version": "${version}",
-  "name": "${name}",
-  "description": "Make creepers no longer grief unjustly, but make them more of an interesting enemy: they spawn creepies now!",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "icon": "${mod_id}.icon.png",
   "authors": [
     "Moonflower"
   ],
   "contributors": [
-    "Ocelot",
-    "Farcr"
+    "Jackson",
+    "RyanHCode"
   ],
   "contact": {
-    "homepage": "https://www.moonflower.gg",
-    "issues": "https://github.com/MoonflowerTeam/${repo}/issues",
-    "sources": "https://github.com/MoonflowerTeam/${repo}/"
+    "homepage": "https://www.moonflower.gg/",
+    "issues": "https://github.com/MoonflowerTeam/${archives_base_name}/issues",
+    "sources": "https://github.com/MoonflowerTeam/${archives_base_name}/"
   },
   "license": "GPLv3",
   "environment": "*",
-  "icon": "icon.png",
-  "mixins": [
-    "${id}-common.mixins.json",
-    "${id}.mixins.json"
-  ],
   "entrypoints": {
     "main": [
-      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabric"
+      "gg.moonflower.pollen.core.fabric.PollenFabric"
     ],
-    "fabric-datagen": [
-      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabricData"
+    "client": [
+      "gg.moonflower.pollen.core.fabric.PollenFabricClient"
     ]
   },
+  "mixins": [
+    "${mod_id}.mixins.json",
+    "${mod_id}-common.mixins.json"
+  ],
   "depends": {
-    "minecraft": "1.18.x",
-    "pollen": "1.x >=1.6"
+    "fabric": "*",
+    "minecraft": "~${minecraft_version}"
   }
 }

@@ -1,15 +1,16 @@
 package gg.moonflower.tolerablecreepers.common.entity;
 
-import gg.moonflower.pollen.api.util.NbtConstants;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCParticles;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -179,7 +180,7 @@ public class CreeperSpores extends ThrowableProjectile {
         spawnParticleSphere(this, this.random, pos, amount, cloudSize);
     }
 
-    public static void spawnParticleSphere(Entity entity, Random random, Vec3 pos, int amount, float cloudSize) {
+    public static void spawnParticleSphere(Entity entity, RandomSource random, Vec3 pos, int amount, float cloudSize) {
         for (int i = 0; i < 4 * amount * cloudSize; i++) {
             float theta = (float) (random.nextFloat() * 2 * Math.PI);
             float phi = (float) (random.nextFloat() * 2 * Math.PI);
@@ -241,9 +242,9 @@ public class CreeperSpores extends ThrowableProjectile {
     @Override
     protected void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("CloudSize", NbtConstants.ANY_NUMERIC))
+        if (nbt.contains("CloudSize", Tag.TAG_ANY_NUMERIC))
             this.setCloudSize(nbt.getInt("CloudSize"));
-        if (nbt.contains("CloudTime", NbtConstants.ANY_NUMERIC)) {
+        if (nbt.contains("CloudTime", Tag.TAG_ANY_NUMERIC)) {
             this.cloudTime = nbt.getInt("CloudTime");
             this.setLanded();
         }
