@@ -1,16 +1,25 @@
 package gg.moonflower.tolerablecreepers.client.render;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import gg.moonflower.pollen.api.render.geometry.v1.GeometryAtlasTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import org.jetbrains.annotations.Nullable;
+import gg.moonflower.pollen.api.render.animation.v1.entity.AnimatedGeometryEntityModel;
+import gg.moonflower.pollen.api.render.geometry.v1.GeometryBufferSource;
+import gg.moonflower.tolerablecreepers.common.entity.Creepie;
+import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Consumer;
+public class CreepieModelWrapper extends AnimatedGeometryEntityModel<Creepie> {
 
-public class CreepieModelWrapper extends GeometryModelWrapper {
+    private GeometryBufferSource buffer;
+
+    public CreepieModelWrapper() {
+        super(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_armor"));
+    }
+
+    public void setBuffer(GeometryBufferSource buffer) {
+        this.buffer = buffer;
+    }
+
     @Override
-    public VertexConsumer getBuffer(MultiBufferSource buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture, @Nullable Consumer<RenderType.CompositeState.CompositeStateBuilder> renderTypeConsumer) {
-        return buffer.getBuffer(texture.getLayer().getRenderType(texture, atlas, renderTypeConsumer));
+    public GeometryBufferSource getGeometryBuffers() {
+        return buffer;
     }
 }

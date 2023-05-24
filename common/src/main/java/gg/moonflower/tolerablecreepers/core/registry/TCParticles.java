@@ -1,8 +1,6 @@
 package gg.moonflower.tolerablecreepers.core.registry;
 
-import gg.moonflower.pollen.api.event.events.registry.client.ParticleFactoryRegistryEvent;
-import gg.moonflower.pollen.api.registry.PollinatedRegistry;
-import gg.moonflower.tolerablecreepers.client.particle.CreeperSporesParticle;
+import dev.architectury.registry.registries.DeferredRegister;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
@@ -12,11 +10,8 @@ import java.util.function.Supplier;
 
 public class TCParticles {
 
-    public static final PollinatedRegistry<ParticleType<?>> PARTICLES = PollinatedRegistry.create(Registry.PARTICLE_TYPE, TolerableCreepers.MOD_ID);
+    public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(TolerableCreepers.MOD_ID, Registry.PARTICLE_TYPE_REGISTRY);
 
-    public static final Supplier<SimpleParticleType> CREEPER_SPORES = PARTICLES.register("creeper_spores", () -> new SimpleParticleType(false));
-
-    public static void registerParticles(ParticleFactoryRegistryEvent.Registry registry) {
-        registry.register(CREEPER_SPORES.get(), CreeperSporesParticle.Provider::new);
-    }
+    public static final Supplier<SimpleParticleType> CREEPER_SPORES = PARTICLES.register("creeper_spores", () -> new SimpleParticleType(false) {
+    });
 }

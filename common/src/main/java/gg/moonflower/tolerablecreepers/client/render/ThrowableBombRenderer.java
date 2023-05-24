@@ -3,7 +3,7 @@ package gg.moonflower.tolerablecreepers.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import gg.moonflower.pollen.api.registry.client.ModelRegistry;
+import gg.moonflower.pollen.api.registry.render.v1.ModelRegistry;
 import gg.moonflower.tolerablecreepers.common.entity.ThrowableBomb;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -15,27 +15,26 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 
 import java.util.List;
-import java.util.Random;
 
 public abstract class ThrowableBombRenderer<T extends ThrowableBomb> extends EntityRenderer<T> {
-
-    private static final Random RANDOM = new Random();
 
     public ThrowableBombRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     private void renderModelLists(BakedModel bakedModel, int packedLight, int packedOverlay, PoseStack poseStack, VertexConsumer vertexConsumer) {
+        RandomSource random = RandomSource.create();
         for (Direction direction : Direction.values()) {
-            RANDOM.setSeed(42L);
-            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, RANDOM), packedLight, packedOverlay);
+            random.setSeed(42L);
+            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, random), packedLight, packedOverlay);
         }
 
-        RANDOM.setSeed(42L);
-        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, RANDOM), packedLight, packedOverlay);
+        random.setSeed(42L);
+        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, random), packedLight, packedOverlay);
     }
 
     private void renderQuadList(PoseStack matrixStack, VertexConsumer vertexConsumer, List<BakedQuad> quads, int packedLight, int packedOverlay) {

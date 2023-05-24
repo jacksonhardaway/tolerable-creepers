@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -26,17 +27,24 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
-
 public class SporeBarrelBlock extends Block {
 
     public SporeBarrelBlock(Properties properties) {
         super(properties);
     }
 
+    public static void explode(Level level, BlockPos blockPos, @Nullable LivingEntity livingEntity) {
+        if (!level.isClientSide()) {
+            PrimedTnt primedTnt = new PrimedSporeBarrel(level, (double) blockPos.getX() + 0.5, blockPos.getY(), (double) blockPos.getZ() + 0.5, livingEntity);
+            level.addFreshEntity(primedTnt);
+            level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.gameEvent(livingEntity, GameEvent.PRIME_FUSE, blockPos);
+        }
+    }
+
     @Override
     public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
-        Random random = level.getRandom();
+        RandomSource random = level.getRandom();
         Direction[] directions = Direction.values();
         for (Direction direction : directions) {
             BlockPos neighborPos = pos.relative(direction);
@@ -111,14 +119,5 @@ public class SporeBarrelBlock extends Block {
     @Override
     public boolean dropFromExplosion(Explosion explosion) {
         return false;
-    }
-
-    public static void explode(Level level, BlockPos blockPos, @Nullable LivingEntity livingEntity) {
-        if (!level.isClientSide()) {
-            PrimedTnt primedTnt = new PrimedSporeBarrel(level, (double) blockPos.getX() + 0.5, blockPos.getY(), (double) blockPos.getZ() + 0.5, livingEntity);
-            level.addFreshEntity(primedTnt);
-            level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
-            level.gameEvent(livingEntity, GameEvent.PRIME_FUSE, blockPos);
-        }
     }
 }

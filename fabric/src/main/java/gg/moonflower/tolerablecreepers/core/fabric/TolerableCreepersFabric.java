@@ -6,6 +6,6 @@ import net.fabricmc.api.ModInitializer;
 public class TolerableCreepersFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        TolerableCreepers.PLATFORM.setup();
+//        TolerableCreepers.PLATFORM.setup();
     }
 }

@@ -6,6 +6,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(TolerableCreepers.MOD_ID)
 public class TolerableCreepersForge {
     public TolerableCreepersForge() {
-        TolerableCreepers.PLATFORM.setup();
+//        TolerableCreepers.PLATFORM.setup();
     }
 }

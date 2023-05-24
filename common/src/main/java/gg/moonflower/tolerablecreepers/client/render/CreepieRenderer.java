@@ -1,14 +1,14 @@
 package gg.moonflower.tolerablecreepers.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import gg.moonflower.pollen.pinwheel.api.client.animation.AnimatedEntityRenderer;
+import gg.moonflower.pollen.api.render.animation.v1.entity.GeometryEntityRenderer;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
+public class CreepieRenderer extends GeometryEntityRenderer<Creepie> {
 
     private static final ResourceLocation MODEL = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie");
 
@@ -41,7 +41,7 @@ public class CreepieRenderer extends AnimatedEntityRenderer<Creepie> {
     }
 
     @Override
-    public ResourceLocation getTextureTableLocation(Creepie entity) {
-        return entity.getCreepieType().getTexture();
+    public ResourceLocation getTextureTableLocation(Creepie creepie, float v) {
+        return creepie.getCreepieType().getTexture();
     }
 }

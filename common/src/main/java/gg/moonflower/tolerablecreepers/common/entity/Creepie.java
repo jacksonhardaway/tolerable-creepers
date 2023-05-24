@@ -2,6 +2,10 @@ package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import gg.moonflower.pinwheel.api.animation.AnimationController;
+import gg.moonflower.pollen.api.animation.v1.AnimationRuntime;
+import gg.moonflower.pollen.api.animation.v1.controller.StateAnimationController;
+import gg.moonflower.pollen.api.animation.v1.controller.TickingAnimationController;
 import gg.moonflower.pollen.api.animation.v1.entity.AnimatedEntity;
 import gg.moonflower.pollen.api.animation.v1.state.AnimationState;
 import gg.moonflower.tolerablecreepers.core.TolerableCreepers;
@@ -105,7 +109,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
     private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE, IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
-    private final AnimationEffectHandler effectHandler;
+    private final StateAnimationController animationController;
+//    private final AnimationEffectHandler effectHandler;
     private AnimationState animationState;
     private AnimationState transitionAnimationState;
     private int animationTick;
@@ -125,7 +130,8 @@ public class Creepie extends Creeper implements AnimatedEntity {
 
     public Creepie(EntityType<? extends Creepie> entityType, Level level) {
         super(entityType, level);
-        this.effectHandler = new AnimationEffectHandler(this);
+        this.animationController = AnimationRuntime.createState(ANIMATIONS, this);
+//        this.effectHandler = new AnimationEffectHandler(this);
         this.animationState = AnimationState.EMPTY;
         this.transitionAnimationState = AnimationState.EMPTY;
         this.age = -24000;
@@ -204,33 +210,33 @@ public class Creepie extends Creeper implements AnimatedEntity {
     @Override
     public void tick() {
         super.tick();
-        AnimatedEntity.super.animationTick();
-        if (!this.isAnimationPlaying(SAD) && !this.isAnimationPlaying(DANCE) && !this.isAnimationTransitioning()) {
+        ((TickingAnimationController) this.animationController).tick();
+        if (!this.animationController.isAnimationPlaying(SAD) && !this.animationController.isAnimationPlaying(DANCE) && !this.animationController.isAnimationTransitioning()) {
             boolean hiding = this.isHiding();
             if (this.level.isClientSide()) {
                 if (hiding) {
-                    if (!this.isAnimationPlaying(HIDE)) {
+                    if (!this.animationController.isAnimationPlaying(HIDE)) {
                         this.setAnimationState(HIDE, 3);
                     }
                     return;
-                } else if (this.isAnimationPlaying(HIDE)) {
+                } else if (this.animationController.isAnimationPlaying(HIDE)) {
                     this.setAnimationState(AnimationState.EMPTY, 3);
                     return;
                 }
 
                 if ((!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) > 1E-6) {
-                    if (!this.isNoAnimationPlaying()) {
+                    if (!this.animationController.getPlayingAnimations().isEmpty()) {
                         this.setAnimationState(AnimationState.EMPTY);
                     }
-                } else if (this.isNoAnimationPlaying()) {
+                } else if (this.animationController.getPlayingAnimations().isEmpty()) {
                     this.setAnimationState(IDLE);
                 }
-            } else if (!hiding && this.isNoAnimationPlaying() && (!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) <= 1E-6) {
+            } else if (!hiding && this.animationController.getPlayingAnimations().isEmpty() && (!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) <= 1E-6) {
                 if (this.noveltyTimer <= 0) {
                     this.noveltyTimer = (2 + this.random.nextInt(9)) * 20; // Every 2-10 seconds, do the novelty animation
                 }
                 if (--this.noveltyTimer <= 0) { // Subtract before compare
-                    AnimatedEntity.setAnimation(this, IDLE_NOVELTY);
+                    this.animationController.setPlayingAnimation(IDLE_NOVELTY);
                 }
             }
         }
@@ -246,7 +252,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
         if (this.sadTimer > 0) {
             this.sadTimer--;
             if (this.sadTimer <= 0) {
-                AnimatedEntity.setAnimation(this, SAD);
+                this.animationController.setPlayingAnimation(SAD);
                 this.getNavigation().stop();
                 return;
             }
@@ -311,11 +317,9 @@ public class Creepie extends Creeper implements AnimatedEntity {
         return animationState;
     }
 
-    @Override
     public void setAnimationState(AnimationState state) {
         if (this.animationState == SAD) // Ignore new animations if currently sad
             return;
-        this.onAnimationStop(this.animationState);
         this.animationState = state;
         this.setAnimationTick(0);
         this.setAnimationTransitionLength(0);
@@ -331,10 +335,10 @@ public class Creepie extends Creeper implements AnimatedEntity {
         this.transitionAnimationState = state;
     }
 
-    @Override
-    public AnimationEffectHandler getAnimationEffects() {
-        return effectHandler;
-    }
+//    @Override
+//    public AnimationEffectHandler getAnimationEffects() {
+//        return effectHandler;
+//    }
 
     @Override
     public AnimationState getIdleAnimationState() {
@@ -474,7 +478,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     public boolean hurt(DamageSource source, float amount) {
         boolean bl = super.hurt(source, amount);
         if (bl && !this.level.isClientSide()) {
-            AnimatedEntity.setAnimation(this, HURT);
+            this.animationController.setPlayingAnimation(HURT);
             if (source.getEntity() instanceof LivingEntity livingAttacker) {
                 CreepieAi.wasHurtBy(this, livingAttacker);
             }
@@ -496,7 +500,7 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     public boolean isSad() {
-        return this.sadTimer > 0 || this.isAnimationPlaying(SAD);
+        return this.sadTimer > 0 || this.animationController.isAnimationPlaying(SAD);
     }
 
     public void setSad(boolean sad) {
@@ -504,11 +508,16 @@ public class Creepie extends Creeper implements AnimatedEntity {
     }
 
     public boolean canMove() {
-        return this.isNoAnimationPlaying();
+        return this.animationController.getPlayingAnimations().isEmpty();
     }
 
     public boolean isHiding() {
         return this.brain.hasMemoryValue(TCEntities.HIDING_SPOT.get()) || this.level.getBlockState(this.blockPosition()).is(TCTags.CREEPIE_HIDING_SPOTS);
+    }
+
+    @Override
+    public AnimationController getAnimationController() {
+        return null;
     }
 
     public enum CreepieType {
