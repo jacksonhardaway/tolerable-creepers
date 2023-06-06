@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import gg.moonflower.pollen.api.animation.v1.state.AnimationState;
 import gg.moonflower.tolerablecreepers.common.entity.ai.*;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
@@ -187,11 +188,11 @@ public class CreepieAi {
         if (!creepie.isSad()) {
             if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
                 creepie.getNavigation().stop();
-//                if (!creepie.isDancing() && !creepie.isAnimationTransitioning()) {
-// TODO                    AnimatedEntity.setAnimation(creepie, Creepie.DANCE, 5);
-//                }
-//            } else if (creepie.isDancing() && !creepie.isAnimationTransitioning()) {
-// TODO                AnimatedEntity.setAnimation(creepie, AnimationState.EMPTY, 2);
+                if (!creepie.isDancing()) {
+                     creepie.setAnimationState(Creepie.DANCE); // 5 transition
+                }
+            } else if (creepie.isDancing()) {
+                creepie.setAnimationState(AnimationState.EMPTY); // 2 transition
             }
         } else {
             brain.eraseMemory(MemoryModuleType.DANCING);
