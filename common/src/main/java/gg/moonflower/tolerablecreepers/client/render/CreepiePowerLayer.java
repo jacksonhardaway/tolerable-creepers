@@ -26,15 +26,15 @@ public class CreepiePowerLayer extends RenderLayer<Creepie, AnimatedGeometryEnti
 
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, Creepie creepie, float f, float g, float partialTicks, float j, float k, float l) {
-        if (creepie.isPowered()) {
-            float offset = (float) creepie.tickCount + partialTicks;
-            this.model.setAnimations(this.getParentModel().getAnimationNames());
-            this.model.prepareMobModel(creepie, f, g, partialTicks);
-            this.getParentModel().copyPropertiesTo(this.model);
-            this.model.setupAnim(creepie, f, g, j, k, l);
-            this.model.setBuffer(Geome);
-            this.wrapper.setParent(this.model.getModel());
-            MinecraftGeometryRenderer.getInstance().render(this.wrapper, TEXTURE, buffer, matrixStack, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F, builder -> TCRenderTypes.applyCreepieArmor(builder, TEXTURE, offset * 0.02F % 1.0F, offset * 0.02F % 1.0F));
-        }
+//        if (creepie.isPowered()) {
+//            float offset = (float) creepie.tickCount + partialTicks;
+//            this.model.setAnimations(this.getParentModel().getAnimationNames());
+//            this.model.prepareMobModel(creepie, f, g, partialTicks);
+//            this.getParentModel().copyPropertiesTo(this.model);
+//            this.model.setupAnim(creepie, f, g, j, k, l);
+//            this.model.setBuffer(Geome);
+//            this.wrapper.setParent(this.model.getModel());
+//            MinecraftGeometryRenderer.getInstance().render(this.wrapper, TEXTURE, buffer, matrixStack, packedLight, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F, builder -> TCRenderTypes.applyCreepieArmor(builder, TEXTURE, offset * 0.02F % 1.0F, offset * 0.02F % 1.0F));
+//        }
     }
 }

@@ -540,7 +540,7 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 
     @Override
     public AnimationController getAnimationController() {
-        return null;
+        return animationController;
     }
 
     public enum CreepieType {

@@ -19,7 +19,7 @@ public class CreepieRenderer extends GeometryEntityRenderer<Creepie> {
 
     @Override
     protected float getBob(Creepie entity, float partialTicks) {
-        return entity.getRenderAnimationTick(partialTicks);
+        return (float)entity.tickCount + partialTicks;
     }
 
     @Override
