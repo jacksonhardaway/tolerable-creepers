@@ -52,9 +52,9 @@ public class TolerableCreepers {
     public static final String MOD_ID = "tolerablecreepers";
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static void init() {
-        TCItems.ITEMS.register();
+    public static void init() {
         TCBlocks.BLOCKS.register();
+        TCItems.ITEMS.register();
         TCEntities.ENTITIES.register();
         TCParticles.PARTICLES.register();
 
@@ -92,7 +92,7 @@ public class TolerableCreepers {
         EntityAttributeRegistry.register(TCEntities.CREEPIE, Creepie::createAttributes);
     }
 
-    private static void postInit() {
+    public static void postInit() {
         DispenserBlock.registerBehavior(TCItems.CREEPER_SPORES.get(), new DefaultDispenseItemBehavior() {
             @Override
             protected ItemStack execute(BlockSource level, ItemStack stack) {

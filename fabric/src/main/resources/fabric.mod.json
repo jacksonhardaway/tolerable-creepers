@@ -21,10 +21,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "gg.moonflower.pollen.core.fabric.PollenFabric"
+      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabric"
     ],
     "client": [
-      "gg.moonflower.pollen.core.fabric.PollenFabricClient"
+      "gg.moonflower.tolerablecreepers.core.fabric.TolerableCreepersFabricClient"
     ]
   },
   "mixins": [
