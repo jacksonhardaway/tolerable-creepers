@@ -28,7 +28,6 @@
     ]
   },
   "mixins": [
-    "${mod_id}.mixins.json",
     "${mod_id}-common.mixins.json"
   ],
   "depends": {

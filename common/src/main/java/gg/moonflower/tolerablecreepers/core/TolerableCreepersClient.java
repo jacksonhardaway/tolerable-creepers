@@ -21,7 +21,7 @@ import net.minecraft.world.item.Items;
 public class TolerableCreepersClient {
 
     public static void init() {
-        ParticleProviderRegistry.register(TCParticles.CREEPER_SPORES.get(), CreeperSporesParticle.Provider::new);
+        ParticleProviderRegistry.register(TCParticles.CREEPER_SPORES, CreeperSporesParticle.Provider::new);
         ModelRegistry.registerSpecial(new ResourceLocation(TolerableCreepers.MOD_ID, "entity/fire_bomb"));
         ModelRegistry.registerSpecial(new ResourceLocation(TolerableCreepers.MOD_ID, "entity/spore_bomb"));
 

@@ -4,6 +4,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.ExplosionEvent;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
+import gg.moonflower.pollen.api.registry.content.v1.CompostablesRegistry;
 import gg.moonflower.tolerablecreepers.common.entity.CreeperSpores;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
 import gg.moonflower.tolerablecreepers.common.entity.FireBomb;
@@ -50,7 +51,6 @@ import org.apache.logging.log4j.Logger;
 public class TolerableCreepers {
 
     public static final String MOD_ID = "tolerablecreepers";
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void init() {
         TCBlocks.BLOCKS.register();
@@ -163,7 +163,7 @@ public class TolerableCreepers {
                 return arg2;
             }
         });
-//        CompostablesRegistry.register(TCItems.CREEPER_SPORES.get(), 0.65F);
+        CompostablesRegistry.register(TCItems.CREEPER_SPORES.get(), 0.65F);
     }
 
 //    private static void onDataInit(Platform.DataSetupContext ctx) {

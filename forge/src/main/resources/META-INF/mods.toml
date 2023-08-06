@@ -30,7 +30,7 @@ versionRange = "[${minecraft_version},)"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.${id}]]
+[[dependencies.${mod_id}]]
 modId = "pollen"
 mandatory = true
 versionRange = "[2.1.0,)"
