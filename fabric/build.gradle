@@ -2,19 +2,11 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
+archivesBaseName = "${rootProject.archivesBaseName}-${project.name}"
+
 architectury {
     platformSetupLoomIde()
     fabric()
-}
-
-loom {
-//    splitEnvironmentSourceSets()
-//    mods {
-//        main {
-//            sourceSet sourceSets.main
-//            sourceSet sourceSets.client
-//        }
-//    }
 }
 
 configurations {
@@ -63,18 +55,18 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
+    archiveClassifier = null
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 components.java {

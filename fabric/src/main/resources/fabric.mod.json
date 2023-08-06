@@ -33,6 +33,7 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": "~${minecraft_version}"
+    "minecraft": "~${minecraft_version}",
+    "pollen": "2.x >=2.1"
   }
 }
