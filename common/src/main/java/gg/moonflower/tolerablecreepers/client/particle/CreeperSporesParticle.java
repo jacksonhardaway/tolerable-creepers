@@ -35,7 +35,7 @@ public class CreeperSporesParticle extends TextureSheetParticle {
         } else {
             this.setSpriteFromAge(this.sprites);
             this.oRoll = this.roll;
-            this.roll += (float) Math.PI * Math.min(0.5, this.yd) * 2.0F;
+            this.roll += (float) (Math.PI * Math.min(0.5, this.yd) * 2.0F);
 
             this.yd -= 0.04 * this.gravity;
             this.move(this.xd, this.yd, this.zd);

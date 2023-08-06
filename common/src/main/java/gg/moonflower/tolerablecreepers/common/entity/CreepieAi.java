@@ -180,22 +180,22 @@ public class CreepieAi {
         if (!brain.hasMemoryValue(MemoryModuleType.CELEBRATE_LOCATION)) {
             brain.eraseMemory(MemoryModuleType.DANCING);
         } else {
-            if (celebration != null && creepie.level.getBlockState(celebration).is(Blocks.JUKEBOX)) {
+            if (celebration != null && creepie.level.getBlockState(celebration).is(TCTags.CREEPIE_FORCE_PARTY_SPOTS)) {
                 brain.setMemory(MemoryModuleType.DANCING, true);
             }
         }
 
-        if (!creepie.isSad()) {
-            if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
-                creepie.getNavigation().stop();
-                if (!creepie.isDancing()) {
-                     creepie.setAnimationState(Creepie.DANCE); // 5 transition
-                }
-            } else if (creepie.isDancing()) {
-                creepie.setAnimationState(AnimationState.EMPTY); // 2 transition
-            }
-        } else {
+        if (creepie.isSad()) {
             brain.eraseMemory(MemoryModuleType.DANCING);
+        }
+
+        if (brain.hasMemoryValue(MemoryModuleType.DANCING)) {
+            creepie.getNavigation().stop();
+            if (!creepie.isDancing()) {
+                creepie.setPlayingAnimation(Creepie.DANCE, 5); // 5 transition
+            }
+        } else if (creepie.isDancing()) {
+            creepie.setPlayingAnimation(AnimationState.EMPTY, 2); // 2 transition
         }
 
         boolean shouldBeSad = creepie.getCreepieType() != Creepie.CreepieType.ENRAGED && brain.getMemory(TCEntities.HAS_FRIENDS.get()).orElse(false);

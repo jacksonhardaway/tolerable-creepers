@@ -35,13 +35,13 @@ public class CreepieRenderer extends GeometryEntityRenderer<Creepie> {
     }
 
     @Override
-    protected float getWhiteOverlayProgress(Creepie creeper, float f) {
-        float g = creeper.getSwelling(f);
-        return (int) (g * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(g, 0.5F, 1.0F);
+    protected float getWhiteOverlayProgress(Creepie creeper, float partialTicks) {
+        float swell = creeper.getSwelling(partialTicks);
+        return (int) (swell * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(swell, 0.5F, 1.0F);
     }
 
     @Override
-    public ResourceLocation getTextureTableLocation(Creepie creepie, float v) {
+    public ResourceLocation getTextureTableLocation(Creepie creepie, float partialTicks) {
         return creepie.getCreepieType().getTexture();
     }
 }

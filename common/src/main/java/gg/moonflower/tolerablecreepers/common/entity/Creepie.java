@@ -2,9 +2,9 @@ package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import gg.moonflower.pinwheel.api.animation.AnimationController;
 import gg.moonflower.pollen.api.animation.v1.AnimationRuntime;
 import gg.moonflower.pollen.api.animation.v1.controller.AnimationStateListener;
+import gg.moonflower.pollen.api.animation.v1.controller.IdleAnimationController;
 import gg.moonflower.pollen.api.animation.v1.controller.StateAnimationController;
 import gg.moonflower.pollen.api.animation.v1.entity.AnimatedEntity;
 import gg.moonflower.pollen.api.animation.v1.state.AnimationState;
@@ -14,6 +14,7 @@ import gg.moonflower.tolerablecreepers.core.mixin.CreeperAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCItems;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
+import gg.moonflower.pinwheel.api.animation.AnimationController;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Creeper;
@@ -62,9 +64,9 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
     private static final ResourceLocation HIDE_ANIMATION = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hide");
     private static final ResourceLocation DANCE_ANIMATION = new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_dance");
 
-    public static final AnimationState IDLE = new AnimationState(Integer.MAX_VALUE, SETUP_ANIMATION, IDLE_ANIMATION);
+    public static final AnimationState IDLE = new AnimationState(0, SETUP_ANIMATION, IDLE_ANIMATION);
     public static final AnimationState IDLE_NOVELTY = new AnimationState(40, SETUP_ANIMATION, IDLE_NOVELTY_ANIMATION);
-    public static final AnimationState WALK = new AnimationState(0, SETUP_ANIMATION, WALK_ANIMATION);
+    public static final AnimationState WALK = new AnimationState(0, SETUP_ANIMATION, IDLE_ANIMATION, WALK_ANIMATION);
     public static final AnimationState HURT = new AnimationState(10, SETUP_ANIMATION, HURT_ANIMATION);
     public static final AnimationState SAD = new AnimationState(40, SETUP_ANIMATION, SIMPLE_WALK_ANIMATION, SAD_ANIMATION);
     public static final AnimationState HIDE = new AnimationState(Integer.MAX_VALUE, SETUP_ANIMATION, HIDE_ANIMATION);
@@ -111,10 +113,11 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
             TCEntities.HIDING_SPOT.get(),
             TCEntities.HAS_FRIENDS.get()
     );
-    private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE, IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
+    private static final AnimationState[] ANIMATIONS = new AnimationState[]{IDLE_NOVELTY, HURT, SAD, HIDE, DANCE};
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Creepie.class, EntityDataSerializers.INT);
 
     private final StateAnimationController animationController;
+    private final IdleAnimationController renderAnimationController;
 //    private final AnimationEffectHandler effectHandler;
 //    private AnimationState animationState;
 //    private AnimationState transitionAnimationState;
@@ -122,6 +125,7 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 //    private int animationTransitionTick;
 //    private int animationTransitionLength;
 
+    private int transitionTicks;
     private int age;
     private int forcedAge;
     private int forcedAgeTimer;
@@ -136,18 +140,18 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
     public Creepie(EntityType<? extends Creepie> entityType, Level level) {
         super(entityType, level);
         this.animationController = AnimationRuntime.createState(ANIMATIONS, this);
-        this.animationController.setRenderTimer(WALK_ANIMATION, (playingAnimation, lastTime, partialTicks) -> {
+        this.animationController.addListener(this);
+        this.renderAnimationController = AnimationRuntime.createIdle(this.animationController, WALK.animations());
+        this.renderAnimationController.setRenderTimer(WALK_ANIMATION, (playingAnimation, lastTime, partialTicks) -> {
             if (!this.isPassenger() && this.isAlive()) {
-                return (this.animationPosition - this.animationSpeed * (1.0F - partialTicks)) * 6.0F;
+                return (this.animationPosition - this.animationSpeed * (1.0F - partialTicks)) / 4.0F;
             }
             return 0.0F;
         });
-        this.animationController.addListener(this);
 //        this.effectHandler = new AnimationEffectHandler(this);
 //        this.animationState = AnimationState.EMPTY;
 //        this.transitionAnimationState = AnimationState.EMPTY;
         this.age = -24000;
-        this.getNavigation().setCanFloat(true);
         ((CreeperAccessor) this).setExplosionRadius(1);
     }
 
@@ -176,14 +180,38 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 //        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
     }
 
-    public void setAnimationState(AnimationState state) {
+    public void setPlayingAnimation(AnimationState state, int transitionTicks) {
         if (!this.animationController.isAnimationPlaying(SAD)) {// Ignore new animations if currently sad
-            this.animationController.setPlayingAnimation(state);
-        }
-        if (!this.level.isClientSide()) {
-            this.syncClient();
+            this.animationController.setPlayingAnimation(state, transitionTicks);
         }
     }
+
+//    @Override
+//    public void writeControllerData(FriendlyByteBuf buf) {
+//        AnimatedEntity.super.writeControllerData(buf);
+//        buf.writeVarInt(this.transitionTicks);
+//    }
+//
+//    @Override
+//    public void readControllerData(FriendlyByteBuf buf) {
+//        Collection<AnimationState> prePlayingStates = this.animationController.getPlayingStates();
+//        AnimatedEntity.super.readControllerData(buf);
+//        int transitionTicks = buf.readVarInt();
+//        transitionTicks = 40;
+//
+//        Collection<AnimationState> playingStates = this.animationController.getPlayingStates();
+//        for (AnimationState state : prePlayingStates) {
+//            if (playingStates.remove(state)) {
+//                this.animationController.stopAnimations(state);
+//                this.animationController.startAnimations(state, transitionTicks);
+//            } else {
+//                this.animationController.stopAnimations(state, transitionTicks);
+//            }
+//        }
+//        for (AnimationState state : playingStates) {
+//            this.animationController.startAnimations(state, transitionTicks);
+//        }
+//    }
 
     private void updateState() {
         Entity owner = this.getOwner();
@@ -232,32 +260,33 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
     public void tick() {
         super.tick();
         this.animationController.tick();
+        if (this.level.isClientSide()) {
+            this.renderAnimationController.tick();
+        } else {
+            this.syncClient();
+        }
         if (!this.animationController.isAnimationPlaying(SAD) && !this.animationController.isAnimationPlaying(DANCE)) {
             boolean hiding = this.isHiding();
+            boolean walking = !this.isPassenger() && this.isAlive() && Math.min(this.animationSpeed, 1.0F) > 1E-6;
             if (this.level.isClientSide()) {
                 if (hiding) {
                     if (!this.animationController.isAnimationPlaying(HIDE)) {
-                        this.setAnimationState(HIDE); // TODO 3 ticks of transition
+                        this.animationController.setPlayingAnimation(HIDE); // TODO 3 ticks of transition
                     }
                     return;
                 } else if (this.animationController.isAnimationPlaying(HIDE)) {
-                    this.setAnimationState(AnimationState.EMPTY); // TODO 3 ticks of transition
+                    this.animationController.stopAnimations(HIDE); // TODO 3 ticks of transition
                     return;
                 }
 
-                if ((!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) > 1E-6) {
-                    if (!this.animationController.getPlayingAnimations().isEmpty()) {
-                        this.setAnimationState(AnimationState.EMPTY);
-                    }
-                } else if (this.animationController.getPlayingAnimations().isEmpty()) {
-                    this.setAnimationState(IDLE);
-                }
-            } else if (!hiding && this.animationController.getPlayingAnimations().isEmpty() && (!this.isPassenger() && this.isAlive() ? Math.min(this.animationSpeed, 1.0F) : 0.0F) <= 1E-6) {
+                this.animationController.clearAnimations();
+                this.renderAnimationController.setIdleAnimations(walking ? WALK.animations() : IDLE.animations());
+            } else if (!hiding && !walking && this.animationController.isNoAnimationPlaying()) {
                 if (this.noveltyTimer <= 0) {
                     this.noveltyTimer = (2 + this.random.nextInt(9)) * 20; // Every 2-10 seconds, do the novelty animation
                 }
                 if (--this.noveltyTimer <= 0) { // Subtract before compare
-                    this.animationController.setPlayingAnimation(IDLE_NOVELTY);
+                    this.setPlayingAnimation(IDLE_NOVELTY, 1);
                 }
             }
         }
@@ -273,7 +302,7 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
         if (this.sadTimer > 0) {
             this.sadTimer--;
             if (this.sadTimer <= 0) {
-                this.animationController.setPlayingAnimation(SAD);
+                this.setPlayingAnimation(SAD, 1);
                 this.getNavigation().stop();
                 return;
             }
@@ -290,7 +319,6 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 //            return (this.animationPosition - this.animationSpeed * (1.0F - partialTicks)) * 6.0F;
 //        return 0.0F;
 //    }
-
 
     @Override
     public void onAnimationStop(AnimationState state) {
@@ -453,6 +481,13 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
     }
 
     @Override
+    protected PathNavigation createNavigation(Level level) {
+        PathNavigation navigation = super.createNavigation(level);
+        navigation.setCanFloat(true);
+        return navigation;
+    }
+
+    @Override
     protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
@@ -514,6 +549,7 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
         return false;
     }
 
+    @Override
     public void playSound(SoundEvent soundEvent) {
         this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
@@ -540,7 +576,12 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 
     @Override
     public AnimationController getAnimationController() {
-        return animationController;
+        return this.animationController;
+    }
+
+    @Override
+    public AnimationController getRenderAnimationController() {
+        return this.renderAnimationController;
     }
 
     public enum CreepieType {

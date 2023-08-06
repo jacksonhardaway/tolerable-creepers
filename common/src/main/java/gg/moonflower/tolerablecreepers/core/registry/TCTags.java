@@ -18,5 +18,6 @@ public class TCTags {
     public static TagKey<Block> CREEPIE_REPELLENTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_repellents"));
     public static TagKey<Block> CREEPIE_HIDING_SPOTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_hiding_spots"));
     public static TagKey<Block> CREEPIE_PARTY_SPOTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_party_spots"));
+    public static TagKey<Block> CREEPIE_FORCE_PARTY_SPOTS = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "creepie_force_party_spots"));
     public static TagKey<Block> FIRE_BOMB_EXPLODE = TagRegistry.bindBlock(new ResourceLocation(TolerableCreepers.MOD_ID, "fire_bomb_explode"));
 }

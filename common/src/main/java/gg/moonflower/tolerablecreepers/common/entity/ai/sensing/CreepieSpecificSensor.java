@@ -12,7 +12,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -58,7 +57,10 @@ public class CreepieSpecificSensor extends Sensor<Creepie> {
             if (!state.is(TCTags.CREEPIE_PARTY_SPOTS)) {
                 return false;
             }
-            return state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD);
+            if (!state.is(TCTags.CREEPIE_FORCE_PARTY_SPOTS)) {
+                return false;
+            }
+            return !state.hasProperty(JukeboxBlock.HAS_RECORD) || state.getValue(JukeboxBlock.HAS_RECORD);
         });
         if (jukeboxPos.isPresent()) {
             return jukeboxPos;
@@ -66,7 +68,7 @@ public class CreepieSpecificSensor extends Sensor<Creepie> {
 
         return BlockPos.findClosestMatch(entity.blockPosition(), (int) Creepie.PARTY_DISTANCE, (int) Creepie.PARTY_DISTANCE, pos -> {
             BlockState state = level.getBlockState(pos);
-            return state.is(TCTags.CREEPIE_PARTY_SPOTS) && !state.is(Blocks.JUKEBOX);
+            return state.is(TCTags.CREEPIE_PARTY_SPOTS) && !state.is(TCTags.CREEPIE_FORCE_PARTY_SPOTS);
         });
     }
 }

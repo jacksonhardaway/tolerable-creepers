@@ -2,6 +2,7 @@ package gg.moonflower.tolerablecreepers.common.entity.ai;
 
 import com.google.common.collect.ImmutableMap;
 import gg.moonflower.tolerablecreepers.common.entity.Creepie;
+import gg.moonflower.tolerablecreepers.core.registry.TCTags;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -24,7 +25,7 @@ public class CreepieDance extends Behavior<Creepie> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Creepie creepie) {
         Brain<?> brain = creepie.getBrain();
-        if (serverLevel.getBlockState(brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).get()).is(Blocks.JUKEBOX)) {
+        if (serverLevel.getBlockState(brain.getMemory(MemoryModuleType.CELEBRATE_LOCATION).get()).is(TCTags.CREEPIE_FORCE_PARTY_SPOTS)) {
             return false;
         }
         return serverLevel.getRandom().nextInt(brain.getMemory(MemoryModuleType.DANCING).orElse(false) ? STOP_CHANCE : AVERAGE_WAIT_TIME_BETWEEN_RUNS) == 0;
