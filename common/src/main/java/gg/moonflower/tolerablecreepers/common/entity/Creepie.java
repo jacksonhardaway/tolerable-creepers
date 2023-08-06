@@ -2,6 +2,7 @@ package gg.moonflower.tolerablecreepers.common.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import gg.moonflower.pinwheel.api.animation.AnimationController;
 import gg.moonflower.pollen.api.animation.v1.AnimationRuntime;
 import gg.moonflower.pollen.api.animation.v1.controller.AnimationStateListener;
 import gg.moonflower.pollen.api.animation.v1.controller.IdleAnimationController;
@@ -14,7 +15,6 @@ import gg.moonflower.tolerablecreepers.core.mixin.CreeperAccessor;
 import gg.moonflower.tolerablecreepers.core.registry.TCEntities;
 import gg.moonflower.tolerablecreepers.core.registry.TCItems;
 import gg.moonflower.tolerablecreepers.core.registry.TCTags;
-import gg.moonflower.pinwheel.api.animation.AnimationController;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -118,14 +118,7 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
 
     private final StateAnimationController animationController;
     private final IdleAnimationController renderAnimationController;
-//    private final AnimationEffectHandler effectHandler;
-//    private AnimationState animationState;
-//    private AnimationState transitionAnimationState;
-//    private int animationTick;
-//    private int animationTransitionTick;
-//    private int animationTransitionLength;
 
-    private int transitionTicks;
     private int age;
     private int forcedAge;
     private int forcedAgeTimer;
@@ -148,9 +141,6 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
             }
             return 0.0F;
         });
-//        this.effectHandler = new AnimationEffectHandler(this);
-//        this.animationState = AnimationState.EMPTY;
-//        this.transitionAnimationState = AnimationState.EMPTY;
         this.age = -24000;
         ((CreeperAccessor) this).setExplosionRadius(1);
     }
@@ -166,52 +156,11 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
         return Creeper.createAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.345);
     }
 
-    @Override
-    protected void registerGoals() {
-//        this.goalSelector.addGoal(1, new FloatGoal(this));
-//        this.goalSelector.addGoal(2, new SwellGoal(this));
-//        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Ocelot.class, 6.0F, 1.0, 1.2));
-//        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Cat.class, 6.0F, 1.0, 1.2));
-//        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, false));
-//        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
-//        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
-//        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
-//        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-//        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
-    }
-
     public void setPlayingAnimation(AnimationState state, int transitionTicks) {
         if (!this.animationController.isAnimationPlaying(SAD)) {// Ignore new animations if currently sad
             this.animationController.setPlayingAnimation(state, transitionTicks);
         }
     }
-
-//    @Override
-//    public void writeControllerData(FriendlyByteBuf buf) {
-//        AnimatedEntity.super.writeControllerData(buf);
-//        buf.writeVarInt(this.transitionTicks);
-//    }
-//
-//    @Override
-//    public void readControllerData(FriendlyByteBuf buf) {
-//        Collection<AnimationState> prePlayingStates = this.animationController.getPlayingStates();
-//        AnimatedEntity.super.readControllerData(buf);
-//        int transitionTicks = buf.readVarInt();
-//        transitionTicks = 40;
-//
-//        Collection<AnimationState> playingStates = this.animationController.getPlayingStates();
-//        for (AnimationState state : prePlayingStates) {
-//            if (playingStates.remove(state)) {
-//                this.animationController.stopAnimations(state);
-//                this.animationController.startAnimations(state, transitionTicks);
-//            } else {
-//                this.animationController.stopAnimations(state, transitionTicks);
-//            }
-//        }
-//        for (AnimationState state : playingStates) {
-//            this.animationController.startAnimations(state, transitionTicks);
-//        }
-//    }
 
     private void updateState() {
         Entity owner = this.getOwner();
@@ -311,15 +260,6 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
         super.customServerAiStep();
     }
 
-//    @Override
-//    public float getRenderAnimationTick(float partialTicks) {
-//        if (!this.isNoAnimationPlaying())
-//            return AnimatedEntity.super.getRenderAnimationTick(partialTicks);
-//        if (!this.isPassenger() && this.isAlive())
-//            return (this.animationPosition - this.animationSpeed * (1.0F - partialTicks)) * 6.0F;
-//        return 0.0F;
-//    }
-
     @Override
     public void onAnimationStop(AnimationState state) {
         if (!this.level.isClientSide() && state == SAD) {
@@ -327,79 +267,6 @@ public class Creepie extends Creeper implements AnimatedEntity, AnimationStateLi
             this.discard();
         }
     }
-
-//    @Override
-//    public void resetAnimationState(int duration) {
-//        if (this.animationState == SAD) {
-//            if (!this.level.isClientSide()) {
-//                CreeperSpores.spawnParticleSphere(this, this.random, this.position(), 50, 1.5F);
-//                this.discard();
-//            }
-//        }
-//
-//        AnimatedEntity.super.resetAnimationState(duration);
-//    }
-
-    //    @Override
-//    public int getAnimationTick() {
-//        return animationTick;
-//    }
-//
-//    @Override
-//    public void setAnimationTick(int tick) {
-//        this.animationTick = tick;
-//    }
-//
-//    @Override
-//    public int getAnimationTransitionTick() {
-//        return animationTransitionTick;
-//    }
-//
-//    @Override
-//    public void setAnimationTransitionTick(int animationTransitionTick) {
-//        this.animationTransitionTick = animationTransitionTick;
-//    }
-//
-//    @Override
-//    public int getAnimationTransitionLength() {
-//        return animationTransitionLength;
-//    }
-//
-//    @Override
-//    public void setAnimationTransitionLength(int animationTransitionLength) {
-//        this.animationTransitionLength = animationTransitionLength;
-//    }
-//
-//    @Override
-//    public AnimationState getAnimationState() {
-//        return animationState;
-//    }
-//
-//
-//    @Override
-//    public AnimationState getTransitionAnimationState() {
-//        return transitionAnimationState;
-//    }
-//
-//    @Override
-//    public void setTransitionAnimationState(AnimationState state) {
-//        this.transitionAnimationState = state;
-//    }
-
-//    @Override
-//    public AnimationEffectHandler getAnimationEffects() {
-//        return effectHandler;
-//    }
-
-//    @Override
-//    public AnimationState getIdleAnimationState() {
-//        return WALK;
-//    }
-//
-//    @Override
-//    public AnimationState[] getAnimationStates() {
-//        return ANIMATIONS;
-//    }
 
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
