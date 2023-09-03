@@ -8,7 +8,7 @@
   ],
   "key": {
     "#": {
-      "item": "#c:string"
+      "tag": "c:string"
     },
     "G": {
       "item": "tolerablecreepers:creeper_spores"

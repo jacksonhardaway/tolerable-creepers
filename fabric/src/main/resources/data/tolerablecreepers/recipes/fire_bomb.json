@@ -8,7 +8,7 @@
   ],
   "key": {
     "#": {
-      "item": "#c:string"
+      "tag": "c:string"
     },
     "G": {
       "item": "minecraft:gunpowder"
