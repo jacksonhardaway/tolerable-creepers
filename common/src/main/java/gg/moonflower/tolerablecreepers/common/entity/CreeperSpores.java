@@ -153,12 +153,6 @@ public class CreeperSpores extends ThrowableProjectile {
                             }
                             this.spawnCreepie.setPos(creepieSpawnPos);
 
-                            BlockState state = this.level.getBlockState(this.spawnCreepie.getOnPos());
-                            if (!state.isFaceSturdy(this.level, this.spawnCreepie.getOnPos(), Direction.UP, SupportType.CENTER) || !this.level.noCollision(this.spawnCreepie, this.spawnCreepie.getBoundingBox())) {
-                                this.spawnCreepie = null;
-                                continue;
-                            }
-
                             this.spawnParticleSphere(creepieSpawnPos, 50, 1.5F);
                             break;
                         }
