@@ -8,8 +8,10 @@
   ],
   "mixins": [
     "AzaleaBlockMixin",
-    "CreeperMixin",
     "CreeperAccessor",
+    "CreeperMixin",
+    "FlowerPotBlockAccessor",
+    "FlowerPotBlockMixin",
     "IronGolemMixin",
     "MobAccessor",
     "ZoglinMixin"
