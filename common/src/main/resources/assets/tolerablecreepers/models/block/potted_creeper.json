@@ -4,7 +4,7 @@
 	"textures": {
 		"particle": "block/flower_pot",
 		"flowerpot": "block/flower_pot",
-		"creeper": "blocks:block/potted_creepie"
+		"creeper": "tolerablecreepers:block/potted_creepie"
 	},
 	"elements": [
 		{
